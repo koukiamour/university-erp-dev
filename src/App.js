@@ -1202,13 +1202,13 @@ transition: "0.3s",
   {
     title: lang === "ar" ? "البلاك بورد" : "Blackboard",
     desc: lang === "ar" ? "منصة التعليم الإلكتروني" : "E-learning platform",
-    icon: "💻",
+    image: "https://i.postimg.cc/qM7g95Hv/blakbwrd.jpg",
     url: "https://lms.ut.edu.sa",
   },
   {
     title: lang === "ar" ? "منصة العمل التطوعي" : "Volunteer Platform",
     desc: lang === "ar" ? "فرص التطوع وخدمة المجتمع" : "Volunteering opportunities",
-    icon: "🤝",
+    image: "https://i.postimg.cc/2jtfScBQ/telechargement.jpg",
     url: "https://nvg.gov.sa",
   },
 ].map((item) => (
