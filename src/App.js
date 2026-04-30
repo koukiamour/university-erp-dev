@@ -1034,112 +1034,114 @@ transition: "0.3s",
     style={{
       maxWidth: "1200px",
       margin: "0 auto",
-      padding: "12px 24px",
+      padding: "10px 20px",
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
+      gap: "5px",
+      flexWrap: "nowrap",
     }}
   >
-    {/* LOGO */}
-<div
-  style={{
-    display: "flex",
-    alignItems: "center",
-    gap: "15px",
-    flexDirection: isMobile ? "column" : "row",
-    textAlign: "center",
-  }}
->  <img
-    src="/logo.png"
-    alt="شعار الجامعة"
-      style={{ width: "80px", height: "80px", objectFit: "contain" }}
-  />
-
-  <div>
-    <div>
- <h2 style={{ margin: 0, fontSize: isMobile ? "12px" : "6px" }}>
-  {lang === "ar"
-    ? "الكلية الجامعية بتيماء"
-    : "University College of Tayma"}
-</h2>
-
-</div>
-  </div>
-</div>
-  
-
-   {/* NAV BUTTONS */}
-<div
-  style={{
-    display: "flex",
-    alignItems: "center",
-    justifyContent: isMobile ? "center" : "space-between",
-    flexWrap: "wrap",
-    fontSize: isMobile ? "14px" : "18px",
-    width: isMobile ? "100%" : "auto",
-    marginTop: isMobile ? "10px" : "0",
-    gap: "6px",
-  }}
->
-  <button onClick={() => setActiveModule("programs")} style={navButtonStyle}>
-    {text.home}
-  </button>
-
-  <button onClick={() => setActiveModule("about")} style={navButtonStyle}>
-    {text.about}
-  </button>
-
-  <button onClick={() => setActiveModule("dean")} style={navButtonStyle}>
-    {lang === "ar" ? "كلمة العميد" : "Dean Message"}
-  </button>
-
-  <button onClick={() => setActiveModule("structure")} style={navButtonStyle}>
-    {lang === "ar" ? "الهيكل التنظيمي" : "Organizational Structure"}
-  </button>
-
-  <button onClick={() => setActiveModule("faculty")} style={navButtonStyle}>
-    {lang === "ar" ? "أعضاء هيئة التدريس" : "Faculty Members"}
-  </button>
-
-  <button onClick={() => setActiveModule("contact")} style={navButtonStyle}>
-    {text.contact}
-  </button>
-
-  {session && profile?.role === "admin" && (
-    <button
-      onClick={() => setActiveModule("dashboard")}
+    {/* LOGO + TITLE */}
+    <div
       style={{
-        ...navButtonStyle,
-        background: activeModule === "dashboard" ? "#134e4a" : "#0f766e",
-        color: "white",
-        boxShadow: "0 4px 12px rgba(15, 118, 110, 0.25)",
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        flexShrink: 0,
       }}
     >
-      {lang === "ar" ? "لوحة التحكم" : "Dashboard"}
-    </button>
-  )}
+      <img
+        src="/logo.png"
+        alt="شعار الجامعة"
+        style={{
+          width: "62px",
+          height: "62px",
+          objectFit: "contain",
+        }}
+      />
 
-  <button
-    onClick={() => setLang(lang === "ar" ? "en" : "ar")}
-    style={navButtonStyle}
-  >
-    {text.toggle}
-  </button>
+      <h2
+        style={{
+          margin: 0,
+          fontSize: "14px",
+          fontWeight: "700",
+          lineHeight: "1.5",
+          whiteSpace: "nowrap",
+          color: "#0f172a",
+        }}
+      >
+        {lang === "ar"
+          ? "الكلية الجامعية بتيماء"
+          : "University College of Tayma"}
+      </h2>
+    </div>
 
-  <button
-    onClick={() => setShowAuthPanel(!showAuthPanel)}
-    style={{
-      ...navButtonStyle,
-      background: "#0f766e",
-      color: "white",
-    }}
-  >
-    {text.login}
-  </button>
-</div>
+    {/* NAV BUTTONS */}
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexWrap: "nowrap",
+        gap: "8px",
+        flex: 1,
+      }}
+    >
+      <button onClick={() => setActiveModule("programs")} style={navButtonStyle}>
+        {text.home}
+      </button>
+
+      <button onClick={() => setActiveModule("about")} style={navButtonStyle}>
+        {text.about}
+      </button>
+
+      <button onClick={() => setActiveModule("dean")} style={navButtonStyle}>
+        {lang === "ar" ? "كلمة العميد" : "Dean Message"}
+      </button>
+
+      <button onClick={() => setActiveModule("structure")} style={navButtonStyle}>
+        {lang === "ar" ? "الهيكل التنظيمي" : "Organizational Structure"}
+      </button>
+
+      <button onClick={() => setActiveModule("faculty")} style={navButtonStyle}>
+        {lang === "ar" ? "أعضاء هيئة التدريس" : "Faculty Members"}
+      </button>
+
+      <button onClick={() => setActiveModule("contact")} style={navButtonStyle}>
+        {text.contact}
+      </button>
+
+      {session && profile?.role === "admin" && (
+        <button
+          onClick={() => setActiveModule("dashboard")}
+          style={{
+            ...navButtonStyle,
+            background: activeModule === "dashboard" ? "#134e4a" : "#0f766e",
+            color: "white",
+          }}
+        >
+          {lang === "ar" ? "لوحة التحكم" : "Dashboard"}
+        </button>
+      )}
+
+      <button onClick={() => setLang(lang === "ar" ? "en" : "ar")} style={navButtonStyle}>
+        {text.toggle}
+      </button>
+
+      <button
+        onClick={() => setShowAuthPanel(!showAuthPanel)}
+        style={{
+          ...navButtonStyle,
+          background: "#0f766e",
+          color: "white",
+        }}
+      >
+        {text.login}
+      </button>
+    </div>
   </div>
 </header>
-
 {/* HERO تحت النافبار */}
 <section
   style={{
@@ -1194,7 +1196,7 @@ transition: "0.3s",
   {
     title: lang === "ar" ? "نظام سهل" : "Sahl System",
     desc: lang === "ar" ? "الخدمات والإجراءات الإلكترونية" : "Electronic services",
-    icon: "🖥️",
+    image: "https://i.postimg.cc/bYBLBcQy/dkhwl-nzam-shl-jamʿt-tbwk.jpg",
     url: "https://gate.ut.edu.sa/sahelv2/",
   },
   {
@@ -1217,14 +1219,30 @@ transition: "0.3s",
     rel="noreferrer"
     style={{ textDecoration: "none", color: "inherit" }}
   >
-    <div style={cardStyle}>
-      <div
+    <div style={{ ...cardStyle, textAlign: "center" }}>
+      {item.image ? (
+  <img
+    src={item.image}
+  alt={item.title}
   style={{
-    fontSize: "40px",
-    marginBottom: "6px",
-    lineHeight: "1",
-  }}
->{item.icon}</div>
+    width: "60px",
+    height: "60px",
+    objectFit: "cover",
+    borderRadius: "12px",
+    display: "inline-block",
+    marginBottom: "10px",
+    }}
+  />
+) : (
+  <div
+    style={{
+      fontSize: "40px",
+      marginBottom: "6px",
+    }}
+  >
+    {item.icon}
+  </div>
+)}
       <h3>{item.title}</h3>
       <p style={{ color: "#64748b" }}>{item.desc}</p>
     </div>
@@ -2405,11 +2423,13 @@ const linkButtonStyle = {
   fontFamily: "Tajawal, sans-serif",
 };
 const navButtonStyle = {
-  border: "none",
+   border: "none",
   background: "transparent",
-  padding: "8px 14px",
+  padding: "5px 7px",
   borderRadius: "8px",
   cursor: "pointer",
-  fontWeight: "bold",
-  fontFamily: "Tajawal, sans-serif", // 🔥 هذا المهم
+  fontWeight: "600",
+  fontSize: "14px",
+  fontFamily: "Tajawal, sans-serif",
+  whiteSpace: "nowrap",
 };
