@@ -1226,15 +1226,16 @@ transition: "0.3s",
   }}
 >{item.image ? (
   <img
-    src={item.image}
-    alt={item.title}
-    style={{
-      width: "100%",
-      height: "140px",
-      objectFit: "cover",
-      borderRadius: "14px",
-      marginBottom: "10px",
-    }}
+  src="https://i.postimg.cc/k5b7KcM3/dkhwl-nzam-shl-jamʿt-tbwk.jpg"
+  alt="نظام سهل"
+  style={{
+    width: "100%",
+    height: "140px",
+    objectFit: "cover",
+    borderRadius: "14px",
+    marginBottom: "10px",
+  }}
+/>
   />
 ) : (
   <div style={{ fontSize: "80px" }}>
