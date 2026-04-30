@@ -214,17 +214,15 @@ table {
   }
 }
 @media (max-width: 768px) {
-  /* باقي الأزرار نص أسود */
   header button {
     color: #000 !important;
     background: transparent !important;
   }
 
-  /* استثناء زر تسجيل الدخول */
-  header button[style*="#0f766e"] {
+  header button:last-child {
     background: #0f766e !important;
-    color: #fff !important;
-    border-radius: 8px;
-    padding: 6px 10px;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    padding: 7px 9px !important;
   }
 }
