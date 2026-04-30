@@ -223,4 +223,14 @@ table {
     background: #ffffff !important;
     color: #095a3a !important;
   }
+}@media (max-width: 768px) {
+  /* كل الأزرار أسود */
+  header button {
+    color: #000 !important;
+  }
+
+  /* زر تسجيل الدخول أبيض */
+  header button:last-child {
+    color: #fff !important;
+  }
 }
