@@ -1195,7 +1195,7 @@ transition: "0.3s",
     title: lang === "ar" ? "نظام سهل" : "Sahl System",
     desc: lang === "ar" ? "الخدمات والإجراءات الإلكترونية" : "Electronic services",
     icon: "🧾",
-    url: "https://gate.ut.edu.sa/sahelv2/",
+    url: "https://https://i.postimg.cc/k5b7KcM3/dkhwl-nzam-shl-jamʿt-tbwk.jpg",
   },
   {
     title: lang === "ar" ? "البلاك بورد" : "Blackboard",
