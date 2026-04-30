@@ -224,3 +224,18 @@ table {
     color: #000000 !important;
   }
 }
+@media (max-width: 768px) {
+  /* باقي الأزرار نص أسود */
+  header button {
+    color: #000 !important;
+    background: transparent !important;
+  }
+
+  /* استثناء زر تسجيل الدخول */
+  header button[style*="#0f766e"] {
+    background: #0f766e !important;
+    color: #fff !important;
+    border-radius: 8px;
+    padding: 6px 10px;
+  }
+}
