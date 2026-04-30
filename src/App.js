@@ -1,16 +1,66 @@
+
+import "./App.css";
 import { supabase } from "./lib/supabaseClient";
 import { useEffect, useState } from "react";
 import StudentPortal from "./pages/StudentPortal";
 import InstructorPortal from "./pages/InstructorPortal";
 import AdminPortal from "./pages/AdminPortal";
+import QualityPortal from "./pages/QualityPortal";
+import ResearchPortal from "./pages/ResearchPortal";
+import CommunityPortal from "./pages/CommunityPortal";
+import AcademicPortal from "./pages/AcademicPortal";
+import DeanMessage from "./pages/DeanMessage";
+import FacultyPage from "./pages/FacultyPage";
+import ContactPage from "./pages/ContactPage";
+import AboutCollege from "./pages/AboutCollege";
+import StructurePage from "./pages/StructurePage";
+import Dashboard from "./pages/Dashboard";
+//=====================
+//export ← يطلع الشي من الملف
+//import ← يدخله في ملف ثاني
+//اكسبورت تعني هذا المكون متاح للاستخدام في ملفات ثانية
+// تشبيه بسيط
+//Dashboard.js = مطبخ 🍳
+//App.js = صالة 🍽️
 
-
-
-
+//export = طلعت الأكل من المطبخ
+//import = جبت الأكل للصالة
+// الخلاصة
+//const = متغير / state
+//function = مكون
+//export = يسمح باستخدامه في ملف آخر
+//import = يجلبه من ملف آخر
+//React = مجموعة ملفات
+//كل ملف فيه Component
+//export يخليها تتواصل مع بعضها
+//=====================
 export default function App() {
+  // =====================
+  // BASIC UI STATES / حالة الواجهة العامة
+  // =====================
   const [activeModule, setActiveModule] = useState(null);
   const [lang, setLang] = useState("ar");
+  const isMobile = window.innerWidth <= 768;
+  const [loading, setLoading] = useState(true);
 
+  // =====================
+  // AUTH STATES / تسجيل الدخول والمستخدم
+  // =====================
+  const [session, setSession] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [showAuthPanel, setShowAuthPanel] = useState(false);
+  const [authMode, setAuthMode] = useState("login");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authName, setAuthName] = useState("");
+  const [authRole, setAuthRole] = useState("student");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
+
+  // =====================
+  // MAIN DATA STATES / بيانات الجداول الرئيسية
+  // =====================
   const [stats, setStats] = useState({
     students: 0,
     programs: 0,
@@ -23,14 +73,35 @@ export default function App() {
   const [researchProjects, setResearchProjects] = useState([]);
   const [communityItems, setCommunityItems] = useState([]);
   const [academicItems, setAcademicItems] = useState([]);
-  const [qualityReports, setQualityReports] = useState([]);
+  const [courses, setCourses] = useState([]);
 
-  const [loading, setLoading] = useState(true);
+  // =====================
+  // PROGRAMS STATES / البرامج والملفات الأكاديمية
+  // =====================
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [programFiles, setProgramFiles] = useState([]);
   const [studyPlans, setStudyPlans] = useState([]);
-  const [showSchedule, setShowSchedule] = useState(false);
-  const [instructorCourses, setInstructorCourses] = useState([]);
+  const [schedules, setSchedules] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [editingProgramFile, setEditingProgramFile] = useState(null);
+  const [showCourseForm, setShowCourseForm] = useState(false);
+
+  const [newProgramFile, setNewProgramFile] = useState({
+    course_id: "",
+    title_ar: "",
+    title_en: "",
+    file_type_ar: "",
+    file_type_en: "",
+    description_ar: "",
+    description_en: "",
+    file_url: "",
+  });
+
+  // =====================
+  // ACTIVITIES STATES / الأنشطة
+  // =====================
+  const [showForm, setShowForm] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState(null);
 
   const [newActivity, setNewActivity] = useState({
     title_ar: "",
@@ -44,21 +115,12 @@ export default function App() {
     image_url: "",
   });
 
-  const [showForm, setShowForm] = useState(false);
-  const [selectedActivity, setSelectedActivity] = useState(null);
-
-  const [session, setSession] = useState(null);
-  const [profile, setProfile] = useState(null);
-
-  const [authMode, setAuthMode] = useState("login");
-  const [authEmail, setAuthEmail] = useState("");
-  const [authPassword, setAuthPassword] = useState("");
-  const [authName, setAuthName] = useState("");
-  const [authRole, setAuthRole] = useState("student");
-  const [authLoading, setAuthLoading] = useState(false);
-  const [showCourseForm, setShowCourseForm] = useState(false);
-  const [schedules, setSchedules] = useState([]);
+  // =====================
+  // PORTAL STATES / بوابات الطلاب وأعضاء هيئة التدريس
+  // =====================
   const [studentCourses, setStudentCourses] = useState([]);
+  const [instructorCourses, setInstructorCourses] = useState([]);
+  const [showSchedule, setShowSchedule] = useState(false);
       const programDetailsFallback = {
   1: {
     description_ar: "برنامج اللغات والترجمة يركز على تنمية مهارات الترجمة والتواصل بين اللغات.",
@@ -94,43 +156,148 @@ export default function App() {
   },
 };
 
-const [newProgramFile, setNewProgramFile] = useState({
-  course_id: "",
-  title_ar: "",
-  title_en: "",
-  file_type_ar: "",
-  file_type_en: "",
-  description_ar: "",
-  description_en: "",
-  file_url: "",
-});
-const [courses, setCourses] = useState([]);
+// =====================
+// STARTUP EFFECTS / تشغيل أولي عند فتح الموقع
+// =====================
 
-  useEffect(() => {
-    fetchAllData();
+useEffect(() => {
+  fetchAllData();
 
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      if (data.session?.user?.email) {
-        loadUserProfileByEmail(data.session.user.email);
+  supabase.auth.getSession().then(({ data }) => {
+    setSession(data.session);
+
+    if (data.session?.user?.email) {
+      loadUserProfileByEmail(data.session.user.email);
+    }
+  });
+
+  const { data: listener } = supabase.auth.onAuthStateChange(
+    async (event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setIsRecoveryMode(true);
       }
-    });
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        if (session?.user?.email) {
-          loadUserProfileByEmail(session.user.email);
-        } else {
-          setProfile(null);
-        }
+      setSession(session);
+
+      if (session?.user?.email) {
+        loadUserProfileByEmail(session.user.email);
+      } else {
+        setProfile(null);
       }
-    );
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
+    }
+  );
 
+  return () => {
+    listener.subscription.unsubscribe();
+  };
+}, []);
+
+// =====================================================
+// FETCH FUNCTIONS / دوال جلب البيانات من Supabase
+// =====================================================
+//
+// الفكرة العامة:
+// هذه الدوال مسؤولة عن أخذ البيانات من قاعدة البيانات Supabase
+// ثم وضعها داخل useState حتى يستطيع React عرضها في الصفحة.
+//
+// المسار الكامل للبيانات يكون هكذا:
+//
+// Supabase Database
+//        ↓
+// fetch function
+//        ↓
+// setState
+//        ↓
+// React re-render
+//        ↓
+// UI / الشاشة
+//
+// مثال:
+//
+// async function fetchPrograms() {
+//   const { data, error } = await supabase
+//     .from("programs")
+//     .select("*");
+//
+//   if (!error) {
+//     setPrograms(data ?? []);
+//   }
+// }
+//
+// شرح المثال:
+//
+// 1. async function
+//    معناها أن هذه الدالة تنتظر نتيجة من الخارج.
+//    هنا النتيجة تأتي من Supabase.
+//
+// 2. await
+//    معناها: انتظر إلى أن ترجع Supabase البيانات.
+//
+// 3. supabase.from("programs")
+//    معناها: اذهب إلى جدول اسمه programs.
+//
+// 4. .select("*")
+//    معناها: اجلب كل الأعمدة من الجدول.
+//
+// 5. data
+//    هي البيانات التي رجعت من Supabase.
+//
+// 6. error
+//    هو الخطأ لو حصلت مشكلة في الاتصال أو اسم الجدول أو الصلاحيات.
+//
+// 7. setPrograms(data ?? [])
+//    هنا نحفظ البيانات داخل State اسمها programs.
+//    إذا data فاضية أو null نضع [] حتى لا ينكسر العرض.
+//
+// 8. React re-render
+//    عندما تتغير programs، React يحدث الشاشة تلقائيًا.
+//
+// متى نستخدم fetch؟
+//
+// نستخدم fetch عندما نحتاج:
+// - عرض بيانات من جدول
+// - تحديث الصفحة بعد إضافة أو حذف أو تعديل
+// - تحميل بيانات أول ما يفتح الموقع
+//
+// أمثلة من هذا المشروع:
+//
+// fetchPrograms()
+// تجلب البرامج الأكاديمية من جدول programs.
+//
+// fetchActivities()
+// تجلب الأنشطة من جدول activities.
+//
+// fetchResearch()
+// تجلب الأبحاث من جدول research_projects.
+//
+// fetchCommunity()
+// تجلب مبادرات المسؤولية المجتمعية.
+//
+// fetchAcademic()
+// تجلب عناصر الشؤون الأكاديمية.
+//
+// fetchStats()
+// تجلب الإحصائيات من جدول dashboard_totals.
+//
+// ملاحظة مهمة:
+// fetch لا يعرض البيانات بنفسه.
+// هو فقط يجلبها ويحفظها في State.
+// العرض يحدث لاحقًا داخل return عن طريق map أو عرض مباشر.
+//
+// مثال العرض:
+//
+// programs.map((program) => (
+//   <div>{program.name_ar}</div>
+// ))
+//
+// القاعدة الذهبية:
+//
+// Supabase يحفظ البيانات.
+// fetch يجلب البيانات.
+// useState يخزن البيانات داخل React.
+// return يعرض البيانات للمستخدم.
+
+// fetchAllData تجمع كل دوال الجلب في مكان واحد.// يتم تشغيلها عند فتح الموقع داخل useEffect.// الهدف منها تحميل بيانات الموقع كلها مرة واحدة.
   async function fetchAllData() {
    setLoading(true);
 await Promise.all([
@@ -139,8 +306,6 @@ await Promise.all([
   fetchResearch(),
   fetchCommunity(),
   fetchAcademic(),
-  fetchQuality(),
-
   fetchStats(),
   fetchProgramFiles(),
   fetchStudyPlans(), // 🔥 هذا مهم لعرض الخطة الدراسية
@@ -228,15 +393,6 @@ async function fetchInstructorCourses(instructorId) {
       .order("id", { ascending: true });
 
     if (!error) setAcademicItems(data ?? []);
-  }
-
-  async function fetchQuality() {
-    const { data, error } = await supabase
-      .from("quality_reports")
-      .select("*")
-      .order("id", { ascending: true });
-
-    if (!error) setQualityReports(data ?? []);
   }
  async function fetchProgramFiles() {
   const { data, error } = await supabase
@@ -506,26 +662,46 @@ async function handleAddCourse(e) {
     alert("خطأ في إضافة الملف الأكاديمي: " + error.message);
     return;
   }
+setShowCourseForm(false);
+}
+async function handleUpdateProgramFile(e) {
+  e.preventDefault();
 
-  setNewProgramFile({
-    course_id: "",
-    title_ar: "",
-    title_en: "",
-    file_type_ar: "",
-    file_type_en: "",
-    description_ar: "",
-    description_en: "",
-    file_url: "",
-  });
+  const { error } = await supabase
+    .from("program_files")
+    .update({
+      title_ar: editingProgramFile.title_ar,
+      title_en: editingProgramFile.title_en,
+      file_url: editingProgramFile.file_url,
+      file_type_ar: editingProgramFile.file_type_ar,
+      file_type_en: editingProgramFile.file_type_en,
+      description_ar: editingProgramFile.description_ar,
+      description_en: editingProgramFile.description_en,
+    })
+    .eq("id", editingProgramFile.id);
 
-  alert("تمت إضافة الملف الأكاديمي بنجاح");
+  if (error) {
+    alert("خطأ في تعديل الملف: " + error.message);
+    return;
+  }
+
+  alert("تم تعديل الملف بنجاح");
+  setEditingProgramFile(null);
+  setSelectedFile(null);
+  await fetchProgramFiles();
 }
 
   const t = {
     ar: {
+  toggle: "English",
+  title: "النظام الذكي للكلية الجامعية بتيماء",
+
+  home: "الرئيسية",
+  about: "عن الكلية",
+  contact: "تواصل معنا",
       toggle: "English",
-      title: "نظام ERP الجامعي المصغر",
-      hero: "منصة ERP جامعية مصغرة لإدارة البرامج الأكاديمية والأنشطة الطلابية والبحث العلمي والمسؤولية المجتمعية والشؤون الأكاديمية والجودة والتحليلات.",
+      title: "النظام الذكي للكلية الجامعية بتيماء",
+      hero: "نظام ERP متكامل للكلية الجامعية بتيماء يهدف إلى إدارة البرامج الأكاديمية والأنشطة الطلابية والبحث العلمي والشؤون الأكاديمية والمسؤولية المجتمعية من خلال منصة رقمية موحدة تدعم اتخاذ القرار المبني على البيانات، ويأتي هذا النظام كأولى مخرجات تنفيذ خطة المجتمع التعليمي للإدارة الذكية.",
       studentsRegistered: "الطالبات المسجلات",
       increaseThisTerm: "من قاعدة البيانات",
       academicPrograms: "البرامج الأكاديمية",
@@ -542,6 +718,7 @@ async function handleAddCourse(e) {
       community: "المسؤولية المجتمعية",
       academic: "الشؤون الأكاديمية",
       quality: "الجودة والتحليلات",
+      
       login: "تسجيل الدخول",
       loginDemo: "دخول فعلي باستخدام Supabase Auth",
       username: "البريد الإلكتروني",
@@ -571,9 +748,13 @@ async function handleAddCourse(e) {
       hours: "عدد الساعات",
     },
     en: {
-      toggle: "العربية",
-      title: "University ERP Mini System",
-      hero: "A mini university ERP platform for managing academic programs, student activities, scientific research, community responsibility, academic affairs, and quality analytics.",
+  toggle: "العربية",
+
+  home: "Home",
+  about: "About",
+  contact: "Contact",
+      title: "ERP System: Tayma University College",
+      hero: "An integrated ERP system for Tayma University College designed to manage academic programs, student activities, scientific research, academic affairs, and community services through a unified digital platform that supports data-driven decision making.",
       studentsRegistered: "Registered Students",
       increaseThisTerm: "From database",
       academicPrograms: "Academic Programs",
@@ -590,6 +771,7 @@ async function handleAddCourse(e) {
       community: "Community Responsibility",
       academic: "Academic Affairs",
       quality: "Quality & Analytics",
+      
       login: "Login",
       loginDemo: "Real login using Supabase Auth",
       username: "Email",
@@ -659,7 +841,7 @@ async function handleAddCourse(e) {
     { id: "research", title: text.research },
     { id: "community", title: text.community },
     { id: "academic", title: text.academic },
-    { id: "quality", title: text.quality },
+      { id: "quality", title: text.quality },
   ];
 
   const roleLabel =
@@ -823,12 +1005,6 @@ transition: "0.3s",
                 {text.volunteerHours}: {item.volunteer_hours}
               </p>
             )}
-
-            {type === "quality" && (
-              <p style={{ color: "#0f766e", fontWeight: "bold" }}>
-                {item.indicator_value}
-              </p>
-            )}
           </div>
         ))}
       </div>
@@ -845,41 +1021,161 @@ transition: "0.3s",
         color: "#0f172a",
       }}
     >
-      <button
-        onClick={() => setLang(lang === "ar" ? "en" : "ar")}
-        style={{
-          position: "fixed",
-          top: "20px",
-          left: lang === "ar" ? "20px" : "auto",
-          right: lang === "en" ? "20px" : "auto",
-          zIndex: 1000,
-          padding: "10px 16px",
-          borderRadius: "10px",
-          border: "none",
-          background: "#0f766e",
-          color: "white",
-          cursor: "pointer",
-          fontWeight: "bold",
-          fontFamily: "Tajawal, sans-serif",
-        }}
-      >
-        {text.toggle}
-      </button>
+<header
+  style={{
+    position: "sticky",
+    top: 0,
+    zIndex: 1500,
+    background: "white",
+    borderBottom: "1px solid #e5e7eb",
+  }}
+>
+  <div
+    style={{
+      maxWidth: "1200px",
+      margin: "0 auto",
+      padding: "12px 24px",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+    }}
+  >
+    {/* LOGO */}
+<div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "15px",
+    flexDirection: isMobile ? "column" : "row",
+    textAlign: "center",
+  }}
+>  <img
+    src="/logo.png"
+    alt="شعار الجامعة"
+      style={{ width: "80px", height: "80px", objectFit: "contain" }}
+  />
 
-      <div
-        style={{
-          background: "linear-gradient(135deg, #0f766e, #14b8a6)",
-          color: "white",
-          padding: "32px",
-        }}
-      >
-        <h1 style={{ margin: 0, fontSize: "42px" }}>{text.title}</h1>
-        <p style={{ marginTop: "12px", fontSize: "17px", lineHeight: 1.8 }}>
-          {text.hero}
-        </p>
-      </div>
+  <div>
+    <div>
+ <h2 style={{ margin: 0, fontSize: isMobile ? "12px" : "15px" }}>
+  {lang === "ar"
+    ? "الكلية الجامعية بتيماء"
+    : "University College of Tayma"}
+</h2>
 
+</div>
+  </div>
+</div>
+  
+
+   {/* NAV BUTTONS */}
+<div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    justifyContent: isMobile ? "center" : "space-between",
+    flexWrap: "wrap",
+    fontSize: isMobile ? "14px" : "18px",
+    width: isMobile ? "100%" : "auto",
+    marginTop: isMobile ? "10px" : "0",
+    gap: "6px",
+  }}
+>
+  <button onClick={() => setActiveModule("programs")} style={navButtonStyle}>
+    {text.home}
+  </button>
+
+  <button onClick={() => setActiveModule("about")} style={navButtonStyle}>
+    {text.about}
+  </button>
+
+  <button onClick={() => setActiveModule("dean")} style={navButtonStyle}>
+    {lang === "ar" ? "كلمة العميد" : "Dean Message"}
+  </button>
+
+  <button onClick={() => setActiveModule("structure")} style={navButtonStyle}>
+    {lang === "ar" ? "الهيكل التنظيمي" : "Organizational Structure"}
+  </button>
+
+  <button onClick={() => setActiveModule("faculty")} style={navButtonStyle}>
+    {lang === "ar" ? "أعضاء هيئة التدريس" : "Faculty Members"}
+  </button>
+
+  <button onClick={() => setActiveModule("contact")} style={navButtonStyle}>
+    {text.contact}
+  </button>
+
+  {session && profile?.role === "admin" && (
+    <button
+      onClick={() => setActiveModule("dashboard")}
+      style={{
+        ...navButtonStyle,
+        background: activeModule === "dashboard" ? "#134e4a" : "#0f766e",
+        color: "white",
+        boxShadow: "0 4px 12px rgba(15, 118, 110, 0.25)",
+      }}
+    >
+      {lang === "ar" ? "لوحة التحكم" : "Dashboard"}
+    </button>
+  )}
+
+  <button
+    onClick={() => setLang(lang === "ar" ? "en" : "ar")}
+    style={navButtonStyle}
+  >
+    {text.toggle}
+  </button>
+
+  <button
+    onClick={() => setShowAuthPanel(!showAuthPanel)}
+    style={{
+      ...navButtonStyle,
+      background: "#0f766e",
+      color: "white",
+    }}
+  >
+    {text.login}
+  </button>
+</div>
+  </div>
+</header>
+
+{/* HERO تحت النافبار */}
+<section
+  style={{
+    background: "linear-gradient(135deg, #0f766e, #14b8a6)",
+    color: "white",
+    padding: "40px 24px",
+  }}
+>
+  <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+    <h1 style={{ textAlign: "center", fontSize: "32px" }}>
+  {text.title}
+</h1>
+
+<p
+  style={{
+    textAlign: "center",
+    maxWidth: "700px",
+    margin: "10px auto",
+    lineHeight: "1.8",
+  }}
+>
+  {text.hero}
+</p>
+  </div>
+</section>
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "24px" }}>
+  {activeModule === "dashboard" ? (
+    <Dashboard
+      session={session}
+      profile={profile}
+      lang={lang}
+      cardStyle={cardStyle}
+      setActiveModule={setActiveModule}
+    />
+  ) : (
+    <>
         <div
           style={{
             display: "grid",
@@ -888,29 +1184,52 @@ transition: "0.3s",
             marginBottom: "24px",
           }}
         >
-          <div style={cardStyle}>
-            <h3>{text.studentsRegistered}</h3>
-            <p style={{ fontSize: "32px", fontWeight: "bold" }}>{stats.students}</p>
-            <p style={{ color: "#64748b" }}>{text.increaseThisTerm}</p>
-          </div>
-
-          <div style={cardStyle}>
-            <h3>{text.academicPrograms}</h3>
-            <p style={{ fontSize: "32px", fontWeight: "bold" }}>{stats.programs}</p>
-            <p style={{ color: "#64748b" }}>{text.bachelorDiploma}</p>
-          </div>
-
-          <div style={cardStyle}>
-            <h3>{text.activeResearch}</h3>
-            <p style={{ fontSize: "32px", fontWeight: "bold" }}>{stats.research}</p>
-            <p style={{ color: "#64748b" }}>{text.withinCollege}</p>
-          </div>
-
-          <div style={cardStyle}>
-            <h3>{text.volunteerHours}</h3>
-            <p style={{ fontSize: "32px", fontWeight: "bold" }}>{stats.volunteer}</p>
-            <p style={{ color: "#64748b" }}>{text.duringYear}</p>
-          </div>
+          {[
+  {
+    title: lang === "ar" ? "منصة MYUT" : "MYUT Portal",
+    desc: lang === "ar" ? "الدخول للخدمات الجامعية" : "University services portal",
+    icon: "🎓",
+    url: "https://myut.ut.edu.sa",
+  },
+  {
+    title: lang === "ar" ? "نظام سهل" : "Sahl System",
+    desc: lang === "ar" ? "الخدمات والإجراءات الإلكترونية" : "Electronic services",
+    icon: "🧾",
+    url: "https://gate.ut.edu.sa/sahelv2/",
+  },
+  {
+    title: lang === "ar" ? "البلاك بورد" : "Blackboard",
+    desc: lang === "ar" ? "منصة التعليم الإلكتروني" : "E-learning platform",
+    icon: "💻",
+    url: "https://lms.ut.edu.sa",
+  },
+  {
+    title: lang === "ar" ? "منصة العمل التطوعي" : "Volunteer Platform",
+    desc: lang === "ar" ? "فرص التطوع وخدمة المجتمع" : "Volunteering opportunities",
+    icon: "🤝",
+    url: "https://nvg.gov.sa",
+  },
+].map((item) => (
+  <a
+    key={item.title}
+    href={item.url}
+    target="_blank"
+    rel="noreferrer"
+    style={{ textDecoration: "none", color: "inherit" }}
+  >
+    <div style={cardStyle}>
+      <div
+  style={{
+    fontSize: "80px",
+    marginBottom: "4px",
+    lineHeight: "1",   // 👈 مهم جدًا
+  }}
+>{item.icon}</div>
+      <h3>{item.title}</h3>
+      <p style={{ color: "#64748b" }}>{item.desc}</p>
+    </div>
+  </a>
+))}
         </div>
 
         <div style={{ ...cardStyle, marginBottom: "24px" }}>
@@ -947,120 +1266,180 @@ transition: "0.3s",
             ))}
           </div>
         </div>
-
-        {loading && <p>{text.loading}</p>}
-        <StudentPortal
-  session={session}
-  profile={profile}
-  lang={lang}
-  cardStyle={cardStyle}
-  studentCourses={studentCourses}
-/>
-
-<InstructorPortal
-  session={session}
-  profile={profile}
-  lang={lang}
-  cardStyle={cardStyle}
-  instructorCourses={instructorCourses}
-/>
-
-<AdminPortal
-  session={session}
-  profile={profile}
-  lang={lang}
-  cardStyle={cardStyle}
-  stats={stats}
-  setActiveModule={setActiveModule}
-/>
+           <div id="module-content">
+  {loading && <p>{text.loading}</p>}
 
 
+  <StudentPortal
+    session={session}
+    profile={profile}
+    lang={lang}
+    cardStyle={cardStyle}
+    studentCourses={studentCourses}
+  />
 
-        {activeModule === "programs" && (
-  <section style={{ ...cardStyle, marginBottom: "24px" }}>
-    <div style={sectionTitle}>{text.programs}</div>
+  <InstructorPortal
+    session={session}
+    profile={profile}
+    lang={lang}
+    cardStyle={cardStyle}
+    instructorCourses={instructorCourses}
+  />
 
-    {profile?.role === "admin" && profile?.module?.includes("programs") && (
-      <button
-  onClick={() => setShowCourseForm(!showCourseForm)}
-  style={{ marginBottom: "12px", ...loginButtonStyle }}
->
- {showCourseForm
-  ? (lang === "ar" ? "إغلاق النموذج" : "Close")
-  : (lang === "ar" ? "إضافة ملف أكاديمي" : "Add Academic File")}
-</button>
+  <QualityPortal
+    activeModule={activeModule}
+    lang={lang}
+    cardStyle={cardStyle}
+    sectionTitle={sectionTitle}
+    subTitle={subTitle}
+  />
 
-    )}
+  <CommunityPortal
+    activeModule={activeModule}
+    lang={lang}
+    cardStyle={cardStyle}
+  />
 
-{showCourseForm && (
-  <form onSubmit={handleAddCourse} style={{ marginBottom: "16px" }}>
+  <AcademicPortal
+    activeModule={activeModule}
+    lang={lang}
+    cardStyle={cardStyle}
+    profile={profile}
+  />
 
-    <input
-      placeholder="عنوان الملف بالعربية"
-      value={newProgramFile.title_ar}
-      onChange={(e) =>
-        setNewProgramFile({ ...newProgramFile, title_ar: e.target.value })
-      }
-      style={inputStyle}
-      required
+  {activeModule === "research" && (
+    <ResearchPortal
+      session={session}
+      profile={profile}
+      lang={lang}
+      cardStyle={cardStyle}
+      setActiveModule={setActiveModule}
     />
+  )}
 
-    <input
-      placeholder="File Title in English"
-      value={newProgramFile.title_en}
-      onChange={(e) =>
-        setNewProgramFile({ ...newProgramFile, title_en: e.target.value })
-      }
-      style={inputStyle}
-    />
+  {activeModule === "programs" && (
+    <section style={{ ...cardStyle, marginBottom: "24px" }}>
+      <div style={sectionTitle}>{text.programs}</div>
 
-    <input
-      placeholder="نوع الملف (كتاب / توصيف / تقرير)"
-      value={newProgramFile.file_type_ar}
-      onChange={(e) =>
-        setNewProgramFile({ ...newProgramFile, file_type_ar: e.target.value })
-      }
-      style={inputStyle}
-    />
+      {profile?.role === "admin" && profile?.module?.includes("programs") && (
+        <button
+          onClick={() => setShowCourseForm(!showCourseForm)}
+          style={{ marginBottom: "12px", ...loginButtonStyle }}
+        >
+          {showCourseForm
+            ? lang === "ar"
+              ? "إغلاق النموذج"
+              : "Close"
+            : lang === "ar"
+            ? "إضافة ملف أكاديمي"
+            : "Add Academic File"}
+        </button>
+      )}
 
-    <input
-      placeholder="File Type (Book / Description / Report)"
-      value={newProgramFile.file_type_en}
-      onChange={(e) =>
-        setNewProgramFile({ ...newProgramFile, file_type_en: e.target.value })
-      }
-      style={inputStyle}
-    />
+      {showCourseForm && (
+        <form onSubmit={handleAddCourse} style={{ marginBottom: "16px" }}>
+          <select
+            value={newProgramFile.program_id}
+            onChange={(e) =>
+              setNewProgramFile({
+                ...newProgramFile,
+                program_id: e.target.value,
+              })
+            }
+            style={inputStyle}
+            required
+          >
+            <option value="">اختاري البرنامج</option>
+            {programs.map((program) => (
+              <option key={program.id} value={program.id}>
+                {lang === "ar" ? program.name_ar : program.name_en}
+              </option>
+            ))}
+          </select>
 
-    <textarea
-      placeholder="وصف الملف"
-      value={newProgramFile.description_ar}
-      onChange={(e) =>
-        setNewProgramFile({ ...newProgramFile, description_ar: e.target.value })
-      }
-      style={inputStyle}
-    />
+          <input
+            placeholder="عنوان الملف بالعربية"
+            value={newProgramFile.title_ar}
+            onChange={(e) =>
+              setNewProgramFile({
+                ...newProgramFile,
+                title_ar: e.target.value,
+              })
+            }
+            style={inputStyle}
+            required
+          />
 
-    <input
-      placeholder="رابط الملف (PDF)"
-      value={newProgramFile.file_url}
-      onChange={(e) =>
-        setNewProgramFile({ ...newProgramFile, file_url: e.target.value })
-      }
-      style={inputStyle}
-      required
-    />
+          <input
+            placeholder="File Title in English"
+            value={newProgramFile.title_en}
+            onChange={(e) =>
+              setNewProgramFile({
+                ...newProgramFile,
+                title_en: e.target.value,
+              })
+            }
+            style={inputStyle}
+          />
 
-    <button type="submit" style={loginButtonStyle}>
-      {lang === "ar" ? "حفظ الملف" : "Save File"}
-    </button>
+          <input
+            placeholder="نوع الملف (كتاب / توصيف / تقرير)"
+            value={newProgramFile.file_type_ar}
+            onChange={(e) =>
+              setNewProgramFile({
+                ...newProgramFile,
+                file_type_ar: e.target.value,
+              })
+            }
+            style={inputStyle}
+          />
 
-  </form>
-)}
-    <DataCards items={programs} type="programs" />
-  </section>
-)}
+          <input
+            placeholder="File Type (Book / Description / Report)"
+            value={newProgramFile.file_type_en}
+            onChange={(e) =>
+              setNewProgramFile({
+                ...newProgramFile,
+                file_type_en: e.target.value,
+              })
+            }
+            style={inputStyle}
+          />
 
+          <textarea
+            placeholder="وصف الملف"
+            value={newProgramFile.description_ar}
+            onChange={(e) =>
+              setNewProgramFile({
+                ...newProgramFile,
+                description_ar: e.target.value,
+              })
+            }
+            style={inputStyle}
+          />
+
+          <input
+            placeholder="رابط الملف أو الخطة أو Google Drive"
+            value={newProgramFile.file_url}
+            onChange={(e) =>
+              setNewProgramFile({
+                ...newProgramFile,
+                file_url: e.target.value,
+              })
+            }
+            style={inputStyle}
+            required
+          />
+
+          <button type="submit" style={loginButtonStyle}>
+            {lang === "ar" ? "حفظ الملف" : "Save File"}
+          </button>
+        </form>
+      )}
+
+      <DataCards items={programs} type="programs" />
+    </section>
+  )}
 </div>
 
         {activeModule === "activities" && (
@@ -1260,19 +1639,6 @@ transition: "0.3s",
           </section>
         )}
 
-        {activeModule === "research" && (
-          <section style={{ ...cardStyle, marginBottom: "24px" }}>
-            <div style={sectionTitle}>{text.research}</div>
-            <DataCards items={researchProjects} type="research" />
-          </section>
-        )}
-
-        {activeModule === "community" && (
-          <section style={{ ...cardStyle, marginBottom: "24px" }}>
-            <div style={sectionTitle}>{text.community}</div>
-            <DataCards items={communityItems} type="community" />
-          </section>
-        )}
 
         {activeModule === "academic" && (
           <section style={{ ...cardStyle, marginBottom: "24px" }}>
@@ -1281,144 +1647,192 @@ transition: "0.3s",
           </section>
         )}
 
-        {activeModule === "quality" && (
-          <section style={{ ...cardStyle, marginBottom: "24px" }}>
-            <div style={sectionTitle}>{text.quality}</div>
-            <DataCards items={qualityReports} type="quality" />
-          </section>
+       {showAuthPanel && (
+  <div
+    onClick={() => setShowAuthPanel(false)}
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(15, 23, 42, 0.45)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 3000,
+      padding: "20px",
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        width: "390px",
+        maxWidth: "100%",
+      }}
+    >
+      <div style={cardStyle}>
+        <div style={sectionTitle}>{text.login}</div>
+        <div style={subTitle}>{text.loginDemo}</div>
+
+        {isRecoveryMode && (
+          <div style={{ marginBottom: "16px" }}>
+            <input
+              type="password"
+              placeholder="كلمة المرور الجديدة"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              style={inputStyle}
+            />
+
+            <button
+              style={loginButtonStyle}
+              onClick={async () => {
+                const { error } = await supabase.auth.updateUser({
+                  password: newPassword,
+                });
+
+                if (error) {
+                  alert("خطأ: " + error.message);
+                  return;
+                }
+
+                alert("تم تحديث كلمة المرور");
+                setIsRecoveryMode(false);
+                setNewPassword("");
+              }}
+            >
+              حفظ كلمة المرور
+            </button>
+          </div>
         )}
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(260px, 1fr)",
-            gap: "16px",
-            marginBottom: "24px",
-          }}
-        >
-          <div style={cardStyle}>
-            <div style={sectionTitle}>{text.login}</div>
-            <div style={subTitle}>{text.loginDemo}</div>
+        {!session ? (
+          <>
+            {authMode === "signup" && (
+              <form onSubmit={handleSignup}>
+                <input
+                  placeholder={text.fullName}
+                  value={authName}
+                  onChange={(e) => setAuthName(e.target.value)}
+                  style={inputStyle}
+                  required
+                />
 
-            {!session ? (
-              <>
-                {authMode === "signup" && (
-                  <form onSubmit={handleSignup}>
-                    <input
-                      placeholder={text.fullName}
-                      value={authName}
-                      onChange={(e) => setAuthName(e.target.value)}
-                      style={inputStyle}
-                      required
-                    />
-                    <input
-                      type="email"
-                      placeholder={text.username}
-                      value={authEmail}
-                      onChange={(e) => setAuthEmail(e.target.value)}
-                      style={inputStyle}
-                      required
-                    />
-                    <input
-                      type="password"
-                      placeholder={text.password}
-                      value={authPassword}
-                      onChange={(e) => setAuthPassword(e.target.value)}
-                      style={inputStyle}
-                      required
-                    />
+                <input
+                  type="email"
+                  placeholder={text.username}
+                  value={authEmail}
+                  onChange={(e) => setAuthEmail(e.target.value)}
+                  style={inputStyle}
+                  required
+                />
 
-                    <select
-                      value={authRole}
-                      onChange={(e) => setAuthRole(e.target.value)}
-                      style={inputStyle}
-                    >
-                      <option value="student">{text.student}</option>
-                      <option value="instructor">{text.instructor}</option>
-                      <option value="admin">{text.admin}</option>
-                    </select>
+                <input
+                  type="password"
+                  placeholder={text.password}
+                  value={authPassword}
+                  onChange={(e) => setAuthPassword(e.target.value)}
+                  style={inputStyle}
+                  required
+                />
 
-                    <button type="submit" disabled={authLoading} style={loginButtonStyle}>
-                      {authLoading ? "جارٍ..." : text.signup}
-                    </button>
-                  </form>
-                )}
+                <select
+                  value={authRole}
+                  onChange={(e) => setAuthRole(e.target.value)}
+                  style={inputStyle}
+                >
+                  <option value="student">{text.student}</option>
+                  <option value="instructor">{text.instructor}</option>
+                  <option value="admin">{text.admin}</option>
+                </select>
 
-                {authMode === "login" && (
-                  <form onSubmit={handleLogin}>
-                    <input
-                      type="email"
-                      placeholder={text.username}
-                      value={authEmail}
-                      onChange={(e) => setAuthEmail(e.target.value)}
-                      style={inputStyle}
-                      required
-                    />
-                    <input
-                      type="password"
-                      placeholder={text.password}
-                      value={authPassword}
-                      onChange={(e) => setAuthPassword(e.target.value)}
-                      style={inputStyle}
-                      required
-                    />
-
-                    <button type="submit" disabled={authLoading} style={loginButtonStyle}>
-                      {authLoading ? "جارٍ..." : text.loginBtn}
-                    </button>
-                  </form>
-                )}
-
-                {authMode === "forgot" && (
-                  <form onSubmit={handleForgotPassword}>
-                    <input
-                      type="email"
-                      placeholder={text.username}
-                      value={authEmail}
-                      onChange={(e) => setAuthEmail(e.target.value)}
-                      style={inputStyle}
-                      required
-                    />
-                    <button type="submit" disabled={authLoading} style={loginButtonStyle}>
-                      {authLoading ? "جارٍ..." : text.sendReset}
-                    </button>
-                  </form>
-                )}
-
-                <div style={{ marginTop: "12px" }}>
-                  {authMode !== "login" && (
-                    <button onClick={() => setAuthMode("login")} style={linkButtonStyle}>
-                      {text.loginBtn}
-                    </button>
-                  )}
-                  {authMode !== "signup" && (
-                    <button onClick={() => setAuthMode("signup")} style={linkButtonStyle}>
-                      {text.signup}
-                    </button>
-                  )}
-                  {authMode !== "forgot" && (
-                    <button onClick={() => setAuthMode("forgot")} style={linkButtonStyle}>
-                      {text.forgot}
-                    </button>
-                  )}
-                </div>
-              </>
-            ) : (
-              <>
-                <p>
-                  {text.welcome}:{" "}
-                  <strong>{profile?.name_ar ?? session.user.email}</strong>
-                </p>
-                <p>
-                  {text.role}: <strong>{roleLabel}</strong>
-                </p>
-                <button onClick={handleLogout} style={loginButtonStyle}>
-                  {text.logout}
+                <button type="submit" disabled={authLoading} style={loginButtonStyle}>
+                  {authLoading ? "جارٍ..." : text.signup}
                 </button>
-              </>
+              </form>
             )}
-          </div>
-        </div>
+
+            {authMode === "login" && (
+              <form onSubmit={handleLogin}>
+                <input
+                  type="email"
+                  placeholder={text.username}
+                  value={authEmail}
+                  onChange={(e) => setAuthEmail(e.target.value)}
+                  style={inputStyle}
+                  required
+                />
+
+                <input
+                  type="password"
+                  placeholder={text.password}
+                  value={authPassword}
+                  onChange={(e) => setAuthPassword(e.target.value)}
+                  style={inputStyle}
+                  required
+                />
+
+                <button type="submit" disabled={authLoading} style={loginButtonStyle}>
+                  {authLoading ? "جارٍ..." : text.loginBtn}
+                </button>
+              </form>
+            )}
+
+            {authMode === "forgot" && (
+              <form onSubmit={handleForgotPassword}>
+                <input
+                  type="email"
+                  placeholder={text.username}
+                  value={authEmail}
+                  onChange={(e) => setAuthEmail(e.target.value)}
+                  style={inputStyle}
+                  required
+                />
+
+                <button type="submit" disabled={authLoading} style={loginButtonStyle}>
+                  {authLoading ? "جارٍ..." : text.sendReset}
+                </button>
+              </form>
+            )}
+
+            <div style={{ marginTop: "12px", textAlign: "center" }}>
+              {authMode !== "login" && (
+                <button onClick={() => setAuthMode("login")} style={linkButtonStyle}>
+                  {text.loginBtn}
+                </button>
+              )}
+
+              {authMode !== "signup" && (
+                <button onClick={() => setAuthMode("signup")} style={linkButtonStyle}>
+                  {text.signup}
+                </button>
+              )}
+
+              {authMode !== "forgot" && (
+                <button onClick={() => setAuthMode("forgot")} style={linkButtonStyle}>
+                  {text.forgot}
+                </button>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <p>
+              {text.welcome}:{" "}
+              <strong>{(lang === "ar" ? profile?.name_ar : profile?.name_en) ?? session.user.email}</strong>
+            </p>
+
+            <p>
+              {text.role}: <strong>{roleLabel}</strong>
+            </p>
+
+            <button onClick={handleLogout} style={loginButtonStyle}>
+              {text.logout}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  </div>
+)}
 
         {selectedActivity && (
   <div
@@ -1503,7 +1917,16 @@ transition: "0.3s",
         />
       )}
 
-      <p style={{ lineHeight: 1.8, color: "#334155" }}>
+      <p  style={{
+    lineHeight: 1.8,
+    fontSize: "18px",
+    color: "#334155",
+    fontWeight: "500",
+    textAlign: "center",
+    maxWidth: "800px",
+    margin: "0 auto",
+  }}
+>
         {lang === "ar"
           ? selectedProgram.description_ar || programDetailsFallback[selectedProgram.id]?.description_ar
           : selectedProgram.description_en || programDetailsFallback[selectedProgram.id]?.description_en}
@@ -1516,12 +1939,18 @@ transition: "0.3s",
 
       <p>
         <strong>{lang === "ar" ? "المدة:" : "Duration:"}</strong>{" "}
-        {selectedProgram.duration || programDetailsFallback[selectedProgram.id]?.duration}
+        {lang === "ar"
+  ? selectedProgram.duration_ar || programDetailsFallback[selectedProgram.id]?.duration
+  : selectedProgram.duration || programDetailsFallback[selectedProgram.id]?.duration}
       </p>
 
       <p>
         <strong>{lang === "ar" ? "عدد الساعات:" : "Hours:"}</strong>{" "}
-        {selectedProgram.hours}
+        {lang === "ar" ? (
+  <span>{selectedProgram.duration_ar}</span>
+) : (
+  <span>{selectedProgram.duration}</span>
+)}
       </p>
 
       <p>
@@ -1531,42 +1960,69 @@ transition: "0.3s",
           : selectedProgram.admission_requirements_en}
       </p>
 
-      {(() => {
-  const schedule = schedules.find(
-  (s) => Number(s.program_id) === Number(selectedProgram.id)
-);
-
-const url = schedule?.file_url;
+     {(() => {
+  const plan = studyPlans.find(
+    (p) => Number(p.program_id) === Number(selectedProgram.id)
+  );
 
   return (
-    <a
-      href={url || "#"}
-onClick={(e) => {
-  if (!url) {
-    e.preventDefault();
-    alert(lang === "ar" ? "لم يتم رفع الجدول الدراسي بعد" : "Schedule not uploaded yet");
-  }
-}}
-      target="_blank"
-      rel="noreferrer"
-      style={{
-        display: "inline-block",
-        background: "#1e293b",
-        color: "white",
-        padding: "10px 14px",
-        borderRadius: "10px",
-        textDecoration: "none",
-        fontWeight: "bold",
-        marginBottom: "12px",
-      }}
-    >
-      {lang === "ar" ? "الجدول الدراسي" : "Study Schedule"}
-    </a>
+    <div style={{ marginBottom: "12px" }}>
+      {plan && (
+        <a
+          href={plan.file_url}
+          target="_blank"
+          rel="noreferrer"
+          style={{
+            background: "#1e293b",
+            color: "white",
+            padding: "10px",
+            borderRadius: "8px",
+            display: "inline-block",
+            marginBottom: "6px",
+            textDecoration: "none",
+          }}
+        >
+          📊 {lang === "ar" ? "عرض الخطة الدراسية" : "View Study Plan"}
+        </a>
+      )}
+
+      {profile?.role === "admin" && (
+        <button
+          onClick={async () => {
+            const url = prompt("رابط الخطة");
+            if (!url) return;
+
+            await supabase.from("study_plans").insert([
+              { program_id: selectedProgram.id, file_url: url },
+            ]);
+
+            fetchStudyPlans();
+          }}
+          style={{ marginRight: "6px" }}
+        >
+          ➕ ➕ {lang === "ar" ? "إضافة" : "Add"}
+        </button>
+      )}
+
+      {profile?.role === "admin" && plan && (
+        <button
+          onClick={async () => {
+            await supabase
+              .from("study_plans")
+              .delete()
+              .eq("id", plan.id);
+
+            fetchStudyPlans();
+          }}
+        >
+           🗑️ {lang === "ar" ? "حذف" : "Delete"}
+        </button>
+      )}
+    </div>
   );
 })()}
-        
-{programFiles.filter((file) => Number(file.program_id) === Number(selectedProgram.id)).length > 0 && (
-  <details style={{ marginTop: "18px", marginBottom: "16px" }}>
+{(profile?.role === "admin" ||
+  programFiles.filter((file) => Number(file.program_id) === Number(selectedProgram.id)).length > 0) && (  <details style={{ marginTop: "18px", marginBottom: "16px" }}>
     <summary
       style={{
         cursor: "pointer",
@@ -1581,39 +2037,350 @@ onClick={(e) => {
       {lang === "ar" ? "عرض الملفات الأكاديمية" : "View Academic Files"}
     </summary>
 
+{profile?.role === "admin" && editingProgramFile && (
+  <form onSubmit={handleUpdateProgramFile} style={{ marginTop: "16px" }}>
+    <h3>تعديل الملف</h3>
+
+    <input
+      value={editingProgramFile.title_ar || ""}
+      onChange={(e) =>
+        setEditingProgramFile({
+          ...editingProgramFile,
+          title_ar: e.target.value,
+        })
+      }
+      placeholder="عنوان الملف"
+      style={inputStyle}
+    />
+
+    <input
+      value={editingProgramFile.file_url || ""}
+      onChange={(e) =>
+        setEditingProgramFile({
+          ...editingProgramFile,
+          file_url: e.target.value,
+        })
+      }
+      placeholder="رابط الملف"
+      style={inputStyle}
+    />
+
+    <button type="submit" style={loginButtonStyle}>
+      حفظ التعديل
+    </button>
+  </form>
+)}
+    {/* 📄 قائمة الملفات */}
     <div style={{ marginTop: "12px" }}>
-      {programFiles
-        .filter((file) => Number(file.program_id) === Number(selectedProgram.id))
-        .map((file) => (
-          <a
-            key={file.id}
-            href={file.file_url}
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              display: "block",
-              marginBottom: "8px",
-              color: "#0f766e",
-              fontWeight: "bold",
-              textDecoration: "none",
-            }}
-          >
-            📄 {lang === "ar" ? file.title_ar : file.title_en}
-          </a>
-        ))}
+      <div style={{ marginTop: "12px" }}>
+  {programFiles
+    .filter((file) => Number(file.program_id) === Number(selectedProgram.id))
+    .map((file) => (
+      <div
+        key={file.id}
+        style={{
+          padding: "10px",
+          borderRadius: "10px",
+          background: "#f8fafc",
+          border: "1px solid #e5e7eb",
+          marginBottom: "6px",
+        }}
+      >
+        📄 {lang === "ar" ? file.title_ar : file.title_en}
+
+        {/* 🔥 أزرار الأدمن */}
+        {profile?.role === "admin" && (
+          <div style={{ marginTop: "6px", display: "flex", gap: "6px" }}>
+            
+            <button
+              onClick={() => setEditingProgramFile(file)}
+              style={{
+                background: "#0f766e",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                padding: "4px 8px",
+                cursor: "pointer",
+              }}
+            >
+              ✏️ {lang === "ar" ? "تعديل" : "Edit"}
+            </button>
+
+            <button
+              onClick={async () => {
+                if (!window.confirm("حذف الملف؟")) return;
+
+                await supabase
+                  .from("program_files")
+                  .delete()
+                  .eq("id", file.id);
+
+                fetchProgramFiles();
+              }}
+              style={{
+                background: "#dc2626",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                padding: "4px 8px",
+                cursor: "pointer",
+              }}
+            >
+              🗑️ {lang === "ar" ? "حذف" : "Delete"}
+            </button>
+
+          </div>
+        )}
+      </div>
+    ))}
+</div>
     </div>
   </details>
 )}
-      <button
-        onClick={() => setSelectedProgram(null)}
-        style={loginButtonStyle}
-      >
-        {lang === "ar" ? "إغلاق" : "Close"}
-      </button>
+
+{profile?.role === "admin" && editingProgramFile && (
+  <form
+    onSubmit={handleUpdateProgramFile}
+    style={{
+      marginTop: "16px",
+      padding: "12px",
+      border: "1px solid #e5e7eb",
+      borderRadius: "10px",
+    }}
+  >
+    <h3>تعديل الملف</h3>
+
+    <input
+      value={editingProgramFile.title_ar || ""}
+      onChange={(e) =>
+        setEditingProgramFile({
+          ...editingProgramFile,
+          title_ar: e.target.value,
+        })
+      }
+      placeholder="عنوان الملف"
+      style={inputStyle}
+    />
+
+    <input
+      value={editingProgramFile.file_url || ""}
+      onChange={(e) =>
+        setEditingProgramFile({
+          ...editingProgramFile,
+          file_url: e.target.value,
+        })
+      }
+      placeholder="رابط الملف"
+      style={inputStyle}
+    />
+
+    <button type="submit" style={loginButtonStyle}>
+      حفظ التعديل
+    </button>
+
+    <button
+      type="button"
+      onClick={() => setEditingProgramFile(null)}
+      style={{
+        ...loginButtonStyle,
+        background: "#64748b",
+        marginTop: "8px",
+      }}
+    >
+      إلغاء
+    </button>
+  </form>
+)}
+
     </div>
   </div>
 )}
+
+{activeModule === "contact" && (
+  <div
+    onClick={() => setActiveModule(null)}
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.5)",
+      zIndex: 4000,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "20px",
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        background: "white",
+        borderRadius: "20px",
+        padding: "20px",
+        width: "95%",
+        maxWidth: "600px",
+        maxHeight: "80vh",
+        overflowY: "auto",
+        textAlign: "center",
+      }}
+    >
+      <button onClick={() => setActiveModule(null)}>✖</button>
+
+      <ContactPage lang={lang} />
+    </div>
+  </div>
+)}
+{activeModule === "about" && (
+  <div
+    onClick={() => setActiveModule(null)}
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.5)",
+      zIndex: 4000,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "20px",
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        background: "white",
+        borderRadius: "20px",
+        padding: "20px",
+        width: "95%",
+        maxWidth: "900px",
+        maxHeight: "85vh",
+        overflowY: "auto",
+      }}
+    >
+      <button onClick={() => setActiveModule(null)}>✖</button>
+      <AboutCollege lang={lang} />
+    </div>
+  </div>
+)}
+
+{activeModule === "structure" && (
+  <div
+    onClick={() => setActiveModule(null)}
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.5)",
+      zIndex: 4000,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "20px",
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        background: "white",
+        borderRadius: "20px",
+        padding: "20px",
+        width: "95%",
+        maxWidth: "900px",
+        maxHeight: "85vh",
+        overflowY: "auto",
+      }}
+    >
+      <button onClick={() => setActiveModule(null)}>✖</button>
+      <StructurePage lang={lang} />
+    </div>
+  </div>
+)}
+{/* 👇 هنا تحط بوباب كلمة العميد */}
+
+{activeModule === "dean" && (
+  <div
+    onClick={() => setActiveModule(null)}
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(15, 23, 42, 0.55)",
+      zIndex: 4000,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "20px",
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        background: "white",
+        borderRadius: "22px",
+        padding: "24px",
+        width: "95%",
+        maxWidth: "900px",
+        maxHeight: "85vh",
+        overflowY: "auto",
+        boxShadow: "0 20px 50px rgba(0,0,0,0.25)",
+      }}
+    >
+      <button
+        onClick={() => setActiveModule(null)}
+        style={{
+          float: lang === "ar" ? "left" : "right",
+          border: "none",
+          background: "#fee2e2",
+          color: "#991b1b",
+          borderRadius: "50%",
+          width: "34px",
+          height: "34px",
+          cursor: "pointer",
+          fontWeight: "bold",
+        }}
+      >
+        ×
+      </button>
+
+      <DeanMessage
+        lang={lang}
+        cardStyle={{ boxShadow: "none", border: "none", padding: 0 }}
+      />
+    </div>
+  </div>
+)}
+{activeModule === "faculty" && (
+  <div
+    onClick={() => setActiveModule(null)}
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.5)",
+      zIndex: 4000,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "20px",
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        background: "white",
+        borderRadius: "20px",
+        padding: "20px",
+        width: "95%",
+        maxWidth: "900px",
+        maxHeight: "85vh",
+        overflowY: "auto",
+      }}
+    >
+      <button onClick={() => setActiveModule(null)}>✖</button>
+
+      <FacultyPage lang={lang} />
+    </div>
+  </div>
+)}
+    </>
+  )}
       </div>
+    </div>
   );
 }
 const loginButtonStyle = {
@@ -1637,4 +2404,12 @@ const linkButtonStyle = {
   fontWeight: "bold",
   fontFamily: "Tajawal, sans-serif",
 };
-
+const navButtonStyle = {
+  border: "none",
+  background: "transparent",
+  padding: "8px 14px",
+  borderRadius: "8px",
+  cursor: "pointer",
+  fontWeight: "bold",
+  fontFamily: "Tajawal, sans-serif", // 🔥 هذا المهم
+};
