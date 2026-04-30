@@ -213,16 +213,3 @@ table {
     border-radius: 8px !important;
   }
 }
-@media (max-width: 768px) {
-  header button {
-    color: #000 !important;
-    background: transparent !important;
-  }
-
-  header button:last-child {
-    background: #0f766e !important;
-    color: #ffffff !important;
-    border-radius: 8px !important;
-    padding: 7px 9px !important;
-  }
-}
