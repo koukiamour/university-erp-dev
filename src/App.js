@@ -1190,7 +1190,7 @@ transition: "0.3s",
   {
     title: lang === "ar" ? "منصة MYUT" : "MYUT Portal",
     desc: lang === "ar" ? "الدخول للخدمات الجامعية" : "University services portal",
-    icon: "🎓",
+    image: "https://i.postimg.cc/mgLDQp83/Capture-d-ecran-2026-05-01-022005.jpg",
     url: "https://myut.ut.edu.sa",
   },
   {
