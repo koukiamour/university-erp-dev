@@ -214,17 +214,6 @@ table {
   }
 }
 @media (max-width: 768px) {
-  header button,
-  header button * {
-    color: #000000 !important;
-  }
-
-  header button[style*="background"] {
-    background: #ffffff !important;
-    color: #000000 !important;
-  }
-}
-@media (max-width: 768px) {
   /* باقي الأزرار نص أسود */
   header button {
     color: #000 !important;
