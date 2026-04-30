@@ -2429,7 +2429,7 @@ const navButtonStyle = {
   borderRadius: "8px",
   cursor: "pointer",
   fontWeight: "600",
-  fontSize: "14px",
+  fontSize: "12px",
   fontFamily: "Tajawal, sans-serif",
   whiteSpace: "nowrap",
 };
