@@ -1194,8 +1194,8 @@ transition: "0.3s",
   {
     title: lang === "ar" ? "نظام سهل" : "Sahl System",
     desc: lang === "ar" ? "الخدمات والإجراءات الإلكترونية" : "Electronic services",
-    icon: "🧾",
-    url: "https://https://i.postimg.cc/k5b7KcM3/dkhwl-nzam-shl-jamʿt-tbwk.jpg",
+    image: "https://i.postimg.cc/k5b7KcM3/dkhwl-nzam-shl-jamʿt-tbwk.jpg",
+    url: "https://drive.google.com/file/d/135lzZD7bn1mvgRrF8kc3fXz2CoYk6i3f/view?usp=sharing",
   },
   {
     title: lang === "ar" ? "البلاك بورد" : "Blackboard",
@@ -1224,7 +1224,23 @@ transition: "0.3s",
     marginBottom: "4px",
     lineHeight: "1",   // 👈 مهم جدًا
   }}
->{item.icon}</div>
+>{item.image ? (
+  <img
+    src={item.image}
+    alt={item.title}
+    style={{
+      width: "100%",
+      height: "140px",
+      objectFit: "cover",
+      borderRadius: "14px",
+      marginBottom: "10px",
+    }}
+  />
+) : (
+  <div style={{ fontSize: "80px" }}>
+    {item.icon}
+  </div>
+)}</div>
       <h3>{item.title}</h3>
       <p style={{ color: "#64748b" }}>{item.desc}</p>
     </div>
