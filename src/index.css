@@ -71,7 +71,9 @@ table {
   body {
     font-size: 14px;
   }
-
+header button {
+  color: #000 !important;
+}
   header > div {
     flex-direction: column !important;
     gap: 10px !important;
