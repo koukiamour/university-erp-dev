@@ -1220,22 +1220,16 @@ transition: "0.3s",
     <div style={cardStyle}>
       <div
   style={{
-    fontSize: "80px",
-    marginBottom: "4px",
-    lineHeight: "1",   // 👈 مهم جدًا
-  }}
-><div
-  style={{
-    fontSize: "45px",   // 👈 هنا تصغير الأيقونة
+    fontSize: "40px",
     marginBottom: "6px",
     lineHeight: "1",
   }}
->
-  {item.icon}
-</div>
-
-<h3>{item.title}</h3>
-<p style={{ color: "#64748b" }}>{item.desc}</p>
+>{item.icon}</div>
+      <h3>{item.title}</h3>
+      <p style={{ color: "#64748b" }}>{item.desc}</p>
+    </div>
+  </a>
+))}
         </div>
 
         <div style={{ ...cardStyle, marginBottom: "24px" }}>
