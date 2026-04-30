@@ -71,9 +71,7 @@ table {
   body {
     font-size: 14px;
   }
-header button {
-  color: #000 !important;
-}
+
   header > div {
     flex-direction: column !important;
     gap: 10px !important;
@@ -213,5 +211,16 @@ header button {
 
   button {
     border-radius: 8px !important;
+  }
+}
+@media (max-width: 768px) {
+  header button,
+  header button * {
+    color: #fdf9f9 !important;
+  }
+
+  header button[style*="background"] {
+    background: #ffffff !important;
+    color: #095a3a !important;
   }
 }
