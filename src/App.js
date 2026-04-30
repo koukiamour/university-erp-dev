@@ -1057,7 +1057,7 @@ transition: "0.3s",
 
   <div>
     <div>
- <h2 style={{ margin: 0, fontSize: isMobile ? "12px" : "15px" }}>
+ <h2 style={{ margin: 0, fontSize: isMobile ? "12px" : "8px" }}>
   {lang === "ar"
     ? "الكلية الجامعية بتيماء"
     : "University College of Tayma"}
