@@ -39,7 +39,8 @@ export default function StructurePage({ lang = "ar" }) {
         alt="structure"
         style={{
           width: "100%",
-          maxWidth: "1200px",
+          maxWidth: "1200px",//هنا عدلت جودة الصورة عشان تكون مناسبة للشاشات الكبيرة
+
           height: "auto",
           objectFit: "contain",
           imageRendering: "auto",

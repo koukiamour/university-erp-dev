@@ -1681,14 +1681,6 @@ transition: "0.3s",
           </section>
         )}
 
-
-        {activeModule === "academic" && (
-          <section style={{ ...cardStyle, marginBottom: "24px" }}>
-            <div style={sectionTitle}>{text.academic}</div>
-            <DataCards items={academicItems} type="academic" />
-          </section>
-        )}
-
        {activeForm === "auth" && (
   <div
     onClick={closeForm}
