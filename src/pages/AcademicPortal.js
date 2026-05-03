@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 export default function AcademicPortal({ activeModule, lang, cardStyle, profile }) {
+  const [showAcademicForm, setShowAcademicForm] = useState(false);
   const [requests, setRequests] = useState([]);
 
   const [form, setForm] = useState({
@@ -141,6 +142,23 @@ export default function AcademicPortal({ activeModule, lang, cardStyle, profile 
           : "Students can submit add/drop requests for multiple courses in one request."}
       </p>
 
+      {profile && (
+  <>
+    <button
+      type="button"
+      onClick={() => setShowAcademicForm(!showAcademicForm)}
+      style={{ ...buttonStyle, marginBottom: "12px", background: "#0f766e" }}
+    >
+      {showAcademicForm
+        ? lang === "ar"
+          ? "إغلاق نموذج الطلب"
+          : "Close Request Form"
+        : lang === "ar"
+        ? "فتح نموذج الطلب"
+        : "Open Request Form"}
+    </button>
+
+    {showAcademicForm && (
       <form onSubmit={submit}>
         <input
           placeholder={lang === "ar" ? "اسم الطالبة" : "Student Name"}
@@ -237,7 +255,10 @@ export default function AcademicPortal({ activeModule, lang, cardStyle, profile 
         <button type="submit" style={buttonStyle}>
           {lang === "ar" ? "إرسال الطلب" : "Submit Request"}
         </button>
-      </form>
+            </form>
+    )}
+  </>
+)}
 
       {profile?.role === "admin" && (
         <>

@@ -85,7 +85,7 @@ export default function ResearchPortal({
     gender: "",
   });
 
-  const canAdd = true;
+  const canAdd = !!session;
 
   useEffect(() => {
     fetchResearch();
@@ -258,7 +258,7 @@ export default function ResearchPortal({
         </button>
       )}
 
-      {showForm && (
+      {canAdd && showForm && (
         <form id="research-form" onSubmit={handleAddResearch} style={formBox}>
           <input
             name="title_ar"

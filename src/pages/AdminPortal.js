@@ -81,13 +81,14 @@ export default function AdminPortal({
     e.preventDefault();
 
     const { error } = await supabase.from("students").insert([
-      {
-        ...newStudent,
-        email: newStudent.email.trim().toLowerCase(),
-        status_ar: "نشط",
-        status_en: "Active",
-      },
-    ]);
+  {
+    student_id: "S" + Date.now(),
+    ...newStudent,
+    email: newStudent.email.trim().toLowerCase(),
+    status_ar: "نشط",
+    status_en: "Active",
+  },
+]);
 
     if (error) return alert(error.message);
 
@@ -108,13 +109,14 @@ export default function AdminPortal({
     e.preventDefault();
 
     const { error } = await supabase.from("instructors").insert([
-      {
-        ...newInstructor,
-        email: newInstructor.email.trim().toLowerCase(),
-        status_ar: "نشط",
-        status_en: "Active",
-      },
-    ]);
+  {
+    instructor_id: "I" + Date.now(), // 🔥 الحل هنا
+    ...newInstructor,
+    email: newInstructor.email.trim().toLowerCase(),
+    status_ar: "نشط",
+    status_en: "Active",
+  },
+]);
 
     if (error) return alert(error.message);
 

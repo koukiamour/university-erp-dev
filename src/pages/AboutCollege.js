@@ -1,44 +1,69 @@
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabaseClient";
+
 export default function AboutCollege({ lang }) {
+  const [about, setAbout] = useState({
+    intro_ar: "",
+    intro_en: "",
+    vision_ar: "",
+    vision_en: "",
+    mission_ar: "",
+    mission_en: "",
+    goals_intro_ar: "",
+    goals_intro_en: "",
+    goal1_ar: "",
+    goal1_en: "",
+    goal2_ar: "",
+    goal2_en: "",
+    goal3_ar: "",
+    goal3_en: "",
+  });
+
+  useEffect(() => {
+    fetchAbout();
+  }, []);
+
+  async function fetchAbout() {
+    const { data, error } = await supabase
+      .from("about_college")
+      .select("*")
+      .eq("id", 1)
+      .limit(1);
+
+    console.log("About from Supabase:", data, error);
+
+    if (error) return;
+
+    if (data && data.length > 0) {
+      setAbout(data[0]);
+    }
+  }
+
   const items = [
-     {
+    {
       title_ar: "الرؤية",
       title_en: "Vision",
-      text_ar: "التميز في العملية التعليمية والبحثية وخدمة المجتمع.",
-      text_en:
-        "Excellence in education, research, and community service.",
+      text_ar: about.vision_ar,
+      text_en: about.vision_en,
     },
     {
       title_ar: "الرسالة",
       title_en: "Mission",
-      text_ar:
-        "الارتقاء بالعمل على كافة مستويات العملية التعليمية والبحث العلمي والشراكة المجتمعية في نشر وتوطين المعرفة وتلبية احتياجات المجتمع في التخصصات المختلفة.",
-      text_en:
-        "Enhancing all levels of the educational process, scientific research, and community partnership in spreading and localizing knowledge and meeting community needs in various specializations.",
+      text_ar: about.mission_ar,
+      text_en: about.mission_en,
     },
-  
     {
       title_ar: "الأهداف",
       title_en: "Goals",
-      text_ar:
-        "نضع رؤيتنا موضع التنفيذ عبر مجموعة من الأهداف العامة التي توجه مسيرتنا نحو التميز.",
-      text_en:
-        "We put our vision into practice through a set of goals that guide our journey toward excellence.",
+      text_ar: about.goals_intro_ar,
+      text_en: about.goals_intro_en,
     },
   ];
 
   const goals = [
-    {
-      ar: "تطوير البرامج والخطط والمقررات الدراسية.",
-      en: "Developing academic programs, study plans, and courses.",
-    },
-    {
-      ar: "دعم البحوث الإبداعية للمساهمة في بناء اقتصاد المعرفة.",
-      en: "Supporting creative research to contribute to building a knowledge economy.",
-    },
-    {
-      ar: "تعزيز الشراكة مع مؤسسات وأفراد المجتمع المحلي.",
-      en: "Strengthening partnerships with local community institutions and individuals.",
-    },
+    { ar: about.goal1_ar, en: about.goal1_en },
+    { ar: about.goal2_ar, en: about.goal2_en },
+    { ar: about.goal3_ar, en: about.goal3_en },
   ];
 
   return (
@@ -57,11 +82,10 @@ export default function AboutCollege({ lang }) {
           fontWeight: "500",
           textAlign: "center",
           marginBottom: "18px",
+          whiteSpace: "pre-line",
         }}
       >
-        {lang === "ar"
-          ? "تأسست الكلية الجامعية بمحافظة تيماء في عام 2009 لتوفير فرص الدراسة في المحافظة والمناطق المجاورة، وتضم الكلية ستة أقسام أكاديمية: الدراسات الإسلامية، اللغات والترجمة، الرياضيات، الأحياء، الإدارة، والحاسب الآلي."
-          : "Tayma University College was established in 2009 to provide study opportunities in Tayma and nearby areas. The college includes six academic departments: Islamic Studies, Languages and Translation, Mathematics, Biology, Management, and Computer Science."}
+        {lang === "ar" ? about.intro_ar : about.intro_en}
       </div>
 
       <div
@@ -86,7 +110,8 @@ export default function AboutCollege({ lang }) {
             <h3 style={{ color: "#0f766e", marginTop: 0 }}>
               {lang === "ar" ? item.title_ar : item.title_en}
             </h3>
-            <p style={{ lineHeight: 1.8 }}>
+
+            <p style={{ lineHeight: 1.8, whiteSpace: "pre-line" }}>
               {lang === "ar" ? item.text_ar : item.text_en}
             </p>
           </div>
@@ -109,6 +134,7 @@ export default function AboutCollege({ lang }) {
               borderRadius: "12px",
               marginBottom: "10px",
               fontWeight: "500",
+              whiteSpace: "pre-line",
             }}
           >
             <strong>

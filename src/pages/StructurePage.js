@@ -1,14 +1,48 @@
-export default function StructurePage() {
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabaseClient";
+
+export default function StructurePage({ lang = "ar" }) {
+  const [imageUrl, setImageUrl] = useState("/structure.png");
+
+  useEffect(() => {
+    fetchStructure();
+  }, []);
+
+  async function fetchStructure() {
+    const { data, error } = await supabase
+      .from("organizational_structure")
+      .select("image_url_ar,image_url_en")
+      .eq("id", 1)
+      .limit(1);
+
+    if (error) {
+      console.log("Structure fetch error:", error);
+      return;
+    }
+
+    if (data && data.length > 0) {
+  const row = data[0];
+
+  const selected =
+    lang === "ar"
+      ? row.image_url_ar
+      : row.image_url_en;
+
+  setImageUrl(selected || "/structure.png");
+}
+  }
+
   return (
     <div style={{ textAlign: "center" }}>
       <img
-        src="/structure.png"
+        src={imageUrl || "/structure.png"}
         alt="structure"
         style={{
-          width: "95%",
-          maxWidth: "820px",
-          maxHeight: "85vh",
+          width: "100%",
+          maxWidth: "1200px",
+          height: "auto",
           objectFit: "contain",
+          imageRendering: "auto",
           borderRadius: "16px",
           boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
         }}

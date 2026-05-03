@@ -48,7 +48,6 @@ export default function App() {
   // =====================
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
-  const [showAuthPanel, setShowAuthPanel] = useState(false);
   const [authMode, setAuthMode] = useState("login");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
@@ -57,6 +56,24 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
+
+  // =====================
+  // FORMS VISIBILITY STATE / التحكم في ظهور الفورمز
+  // =====================
+  // activeForm يتحكم في كل الفورمز من مكان واحد:
+  // null = لا يوجد فورم مفتوح
+  // "auth" = فورم تسجيل الدخول
+  // "activity" = فورم إضافة نشاط
+  // "course" = فورم إضافة ملف أكاديمي
+  const [activeForm, setActiveForm] = useState(null);
+
+  function toggleForm(formName) {
+    setActiveForm(activeForm === formName ? null : formName);
+  }
+
+  function closeForm() {
+    setActiveForm(null);
+  }
 
   // =====================
   // MAIN DATA STATES / بيانات الجداول الرئيسية
@@ -84,7 +101,6 @@ export default function App() {
   const [schedules, setSchedules] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [editingProgramFile, setEditingProgramFile] = useState(null);
-  const [showCourseForm, setShowCourseForm] = useState(false);
 
   const [newProgramFile, setNewProgramFile] = useState({
     course_id: "",
@@ -100,7 +116,6 @@ export default function App() {
   // =====================
   // ACTIVITIES STATES / الأنشطة
   // =====================
-  const [showForm, setShowForm] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState(null);
 
   const [newActivity, setNewActivity] = useState({
@@ -425,54 +440,54 @@ async function fetchInstructorCourses(instructorId) {
   });
 }
 
-  async function loadUserProfileByEmail(email) {
-    const cleanEmail = email.trim().toLowerCase();
+ async function loadUserProfileByEmail(email) {
+  const cleanEmail = email.trim().toLowerCase();
 
-    const { data: student } = await supabase
-      .from("students")
-      .select("*")
-      .ilike("email", cleanEmail)
-      .maybeSingle();
+  const { data: admin } = await supabase
+    .from("admins")
+    .select("*")
+    .ilike("email", cleanEmail)
+    .maybeSingle();
 
-    if (student) {
-      setProfile({ ...student, role: "student" });
-        await fetchStudentCourses(student.student_id);
+  if (admin) {
+    const modules =
+      Array.isArray(admin.module)
+        ? admin.module
+        : admin.module
+        ? [admin.module]
+        : [];
 
-      return;
-    }
-
-    const { data: instructor } = await supabase
-      .from("instructors")
-      .select("*")
-      .ilike("email", cleanEmail)
-      .maybeSingle();
-
-    if (instructor) {
-  setProfile({ ...instructor, role: "instructor" });
-  await fetchInstructorCourses(instructor.instructor_id);
-  return;
-}
-
-    const { data: admin } = await supabase
-  .from("admins")
-  .select("*")
-  .ilike("email", cleanEmail)
-  .maybeSingle();
-
-if (admin) {
-  const modules =
-    Array.isArray(admin.module)
-      ? admin.module
-      : admin.module
-      ? [admin.module]
-      : [];
-
-  setProfile({ ...admin, module: modules, role: "admin" });
-  return;
-}
-
-    setProfile(null);
+    setProfile({ ...admin, module: modules, role: "admin" });
+    return;
   }
+
+  const { data: instructor } = await supabase
+    .from("instructors")
+    .select("*")
+    .ilike("email", cleanEmail)
+    .maybeSingle();
+
+  if (instructor) {
+    setProfile({ ...instructor, role: "instructor" });
+    await fetchInstructorCourses(instructor.instructor_id);
+    return;
+  }
+
+  const { data: student } = await supabase
+    .from("students")
+    .select("*")
+    .ilike("email", cleanEmail)
+    .maybeSingle();
+
+  if (student) {
+    setProfile({ ...student, role: "student" });
+    await fetchStudentCourses(student.student_id);
+    return;
+  }
+
+  setProfile(null);
+}
+
 
   async function handleSignup(e) {
     e.preventDefault();
@@ -510,24 +525,30 @@ if (admin) {
     let insertError = null;
 
     if (authRole === "student") {
-      const { error } = await supabase.from("students").insert([
-        { ...commonData, major: "", level: 1 },
-      ]);
-      insertError = error;
-    }
+  const { error } = await supabase.from("students").insert([
+    {
+      ...commonData,
+      student_id: "S" + Date.now(), // 🔥 مهم جدًا
+      major: "",
+      level: 1,
+    },
+  ]);
+  insertError = error;
+}
 
     if (authRole === "instructor") {
-      const { error } = await supabase.from("instructors").insert([
-        {
-          ...commonData,
-          department_ar: "",
-          department_en: "",
-          title_ar: "عضو هيئة تدريس",
-          title_en: "Instructor",
-        },
-      ]);
-      insertError = error;
-    }
+  const { error } = await supabase.from("instructors").insert([
+    {
+      ...commonData,
+      instructor_id: "I" + Date.now(),
+      department_ar: "",
+      department_en: "",
+      title_ar: "عضو هيئة تدريس",
+      title_en: "Instructor",
+    },
+  ]);
+  insertError = error;
+}
 
     if (authRole === "admin") {
       const { error } = await supabase.from("admins").insert([
@@ -636,6 +657,7 @@ if (admin) {
     });
 
     await fetchActivities();
+    closeForm();
     alert("تمت إضافة النشاط بنجاح");
   }
 async function handleAddCourse(e) {
@@ -662,7 +684,9 @@ async function handleAddCourse(e) {
     alert("خطأ في إضافة الملف الأكاديمي: " + error.message);
     return;
   }
-setShowCourseForm(false);
+await fetchProgramFiles();
+  closeForm();
+  alert("تمت إضافة الملف الأكاديمي بنجاح");
 }
 async function handleUpdateProgramFile(e) {
   e.preventDefault();
@@ -1130,7 +1154,7 @@ transition: "0.3s",
       </button>
 
       <button
-        onClick={() => setShowAuthPanel(!showAuthPanel)}
+        onClick={() => toggleForm("auth")}
         style={{
           ...navButtonStyle,
           background: "#0f766e",
@@ -1341,10 +1365,10 @@ transition: "0.3s",
 
       {profile?.role === "admin" && profile?.module?.includes("programs") && (
         <button
-          onClick={() => setShowCourseForm(!showCourseForm)}
+          onClick={() => toggleForm("course")}
           style={{ marginBottom: "12px", ...loginButtonStyle }}
         >
-          {showCourseForm
+          {activeForm === "course"
             ? lang === "ar"
               ? "إغلاق النموذج"
               : "Close"
@@ -1354,7 +1378,7 @@ transition: "0.3s",
         </button>
       )}
 
-      {showCourseForm && (
+      {activeForm === "course" && (
         <form onSubmit={handleAddCourse} style={{ marginBottom: "16px" }}>
           <select
             value={newProgramFile.program_id}
@@ -1542,13 +1566,13 @@ transition: "0.3s",
             {profile?.role === "admin" && (
               <>
                 <button
-                  onClick={() => setShowForm(!showForm)}
+                  onClick={() => toggleForm("activity")}
                   style={loginButtonStyle}
                 >
-                  {showForm ? text.closeForm : text.addActivity}
+                  {activeForm === "activity" ? text.closeForm : text.addActivity}
                 </button>
 
-                {showForm && (
+                {activeForm === "activity" && (
                   <form onSubmit={handleAddActivity} style={{ marginTop: "16px" }}>
                     <input
                       placeholder="عنوان النشاط بالعربية"
@@ -1665,9 +1689,9 @@ transition: "0.3s",
           </section>
         )}
 
-       {showAuthPanel && (
+       {activeForm === "auth" && (
   <div
-    onClick={() => setShowAuthPanel(false)}
+    onClick={closeForm}
     style={{
       position: "fixed",
       inset: 0,
@@ -2054,6 +2078,41 @@ transition: "0.3s",
     >
       {lang === "ar" ? "عرض الملفات الأكاديمية" : "View Academic Files"}
     </summary>
+    <div style={{ marginTop: "16px" }}>
+  {programFiles
+    .filter((file) => Number(file.program_id) === Number(selectedProgram.id))
+    .map((file) => (
+      <div
+        key={file.id}
+        style={{
+          background: "#f8fafc",
+          padding: "12px",
+          borderRadius: "10px",
+          marginBottom: "10px",
+          border: "1px solid #e2e8f0",
+        }}
+      >
+        {file.file_url ? (
+          <a
+            href={file.file_url}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              color: "#0f766e",
+              fontWeight: "bold",
+              textDecoration: "none",
+            }}
+          >
+            📄 {lang === "ar" ? file.title_ar : file.title_en}
+          </a>
+        ) : (
+          <span>
+            📄 {lang === "ar" ? file.title_ar : file.title_en}
+          </span>
+        )}
+      </div>
+    ))}
+</div>
 
 {profile?.role === "admin" && editingProgramFile && (
   <form onSubmit={handleUpdateProgramFile} style={{ marginTop: "16px" }}>
@@ -2429,7 +2488,7 @@ const navButtonStyle = {
   borderRadius: "8px",
   cursor: "pointer",
   fontWeight: "600",
-  fontSize: "10px",
+  fontSize: "13ٍٍٍpx",
   fontFamily: "Tajawal, sans-serif",
   whiteSpace: "nowrap",
 };

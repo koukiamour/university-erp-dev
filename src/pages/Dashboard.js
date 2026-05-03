@@ -39,6 +39,11 @@ export default function Dashboard({
     goal3_en: "",
   });
 
+  const [structureForm, setStructureForm] = useState({
+  image_url_ar: "",
+  image_url_en: "",
+});
+
   const emptyForms = {
     programs: {
       name_ar: "",
@@ -294,41 +299,58 @@ export default function Dashboard({
   };
 
   useEffect(() => {
-    if (session && profile?.role === "admin") fetchDean();
-  }, [session, profile]);
+  if (session && profile?.role === "admin") fetchDean();
+}, [session, profile]);
 
-  useEffect(() => {
-    if (!session || profile?.role !== "admin" || !selectedSection) return;
+useEffect(() => {
+  if (!session || profile?.role !== "admin" || !selectedSection) return;
 
-    if (selectedSection === "about") fetchAbout();
+  if (selectedSection === "dean") fetchDean();
 
-    if (configs[selectedSection]) {
-      setEditingId(null);
-      setContentForm(emptyForms[selectedSection]);
-      fetchItems(selectedSection);
-window.location.reload();
-    }
-  }, [selectedSection, session, profile]);
+  if (selectedSection === "about") fetchAbout();
 
-  async function fetchDean() {
-    const { data, error } = await supabase
-      .from("dean_message")
-      .select("*")
-      .eq("id", 1)
-      .single();
+  if (selectedSection === "structure") fetchStructure();
 
-    if (!error && data) setDeanForm(data);
+  if (configs[selectedSection]) {
+    setEditingId(null);
+    setContentForm(emptyForms[selectedSection]);
+    fetchItems(selectedSection);
   }
+}, [selectedSection, session, profile]);
+
+async function fetchDean() {
+  const { data, error } = await supabase
+    .from("dean_message")
+    .select("id,name,message_ar,message_en,image_url")
+    .eq("id", 1)
+    .limit(1);
+
+  if (error) {
+    alert("خطأ في جلب كلمة العميد: " + error.message);
+    return;
+  }
+
+  if (data && data.length > 0) {
+    setDeanForm(data[0]);
+  }
+}
 
   async function fetchAbout() {
-    const { data, error } = await supabase
-      .from("about_college")
-      .select("*")
-      .eq("id", 1)
-      .single();
+  const { data, error } = await supabase
+    .from("about_college")
+    .select("*")
+    .eq("id", 1)
+    .limit(1);
 
-    if (!error && data) setAboutForm(data);
+  if (error) {
+    alert("خطأ في جلب بيانات عن الكلية: " + error.message);
+    return;
   }
+
+  if (data && data.length > 0) {
+    setAboutForm(data[0]);
+  }
+}
 
   async function fetchItems(sectionId) {
     const config = configs[sectionId];
@@ -410,6 +432,10 @@ window.location.reload();
     if (editingId) {
       result = await supabase.from(config.table).update(payload).eq(pk, editingId);
     } else {
+      if (selectedSection === "faculty") {
+        payload.instructor_id = "I" + Date.now();
+      }
+
       result = await supabase.from(config.table).insert([payload]);
     }
 
@@ -441,26 +467,105 @@ window.location.reload();
     alert(lang === "ar" ? "تم الحذف" : "Deleted");
     fetchItems(selectedSection);
   }
+async function saveDean() {
+  const { data, error } = await supabase
+    .from("dean_message")
+    .update({
+      name: deanForm.name,
+      message_ar: deanForm.message_ar,
+      message_en: deanForm.message_en,
+      image_url: deanForm.image_url,
+    })
+    .eq("id", 1)
+    .select();
 
-  async function saveDean() {
-    const { error } = await supabase
-      .from("dean_message")
-      .update(deanForm)
-      .eq("id", 1);
-
-    if (error) return alert("خطأ: " + error.message);
-    alert(lang === "ar" ? "تم تحديث كلمة العميد" : "Dean message updated");
+  if (error) {
+    alert("خطأ: " + error.message);
+    return;
   }
 
-  async function saveAbout() {
-    const { error } = await supabase
-      .from("about_college")
-      .update(aboutForm)
-      .eq("id", 1);
-
-    if (error) return alert("خطأ: " + error.message);
-    alert(lang === "ar" ? "تم تحديث بيانات عن الكلية" : "About college updated");
+  if (!data || data.length === 0) {
+    alert("ما تم تعديل أي صف (تأكدي من RLS أو id)");
+    return;
   }
+
+  setDeanForm(data[0]);
+
+  alert("تم تحديث كلمة العميد");
+}
+ async function saveAbout() {
+  const payload = {
+    intro_ar: aboutForm.intro_ar,
+    intro_en: aboutForm.intro_en,
+    vision_ar: aboutForm.vision_ar,
+    vision_en: aboutForm.vision_en,
+    mission_ar: aboutForm.mission_ar,
+    mission_en: aboutForm.mission_en,
+    goals_intro_ar: aboutForm.goals_intro_ar,
+    goals_intro_en: aboutForm.goals_intro_en,
+    goal1_ar: aboutForm.goal1_ar,
+    goal1_en: aboutForm.goal1_en,
+    goal2_ar: aboutForm.goal2_ar,
+    goal2_en: aboutForm.goal2_en,
+    goal3_ar: aboutForm.goal3_ar,
+    goal3_en: aboutForm.goal3_en,
+  };
+
+  const { data, error } = await supabase
+    .from("about_college")
+    .update(payload)
+    .eq("id", 1)
+    .select();
+
+  if (error) return alert("خطأ: " + error.message);
+
+  if (data && data.length > 0) {
+    setAboutForm(data[0]);
+  }
+
+  alert(lang === "ar" ? "تم تحديث بيانات عن الكلية" : "About college updated");
+}
+
+async function fetchStructure() {
+  const { data, error } = await supabase
+    .from("organizational_structure")
+    .select("id,image_url_ar,image_url_en")
+    .eq("id", 1)
+    .limit(1);
+
+  if (error) {
+    alert("خطأ في جلب الهيكل التنظيمي: " + error.message);
+    return;
+  }
+
+  if (data && data.length > 0) {
+    setStructureForm(data[0]);
+  }
+}
+
+async function saveStructure() {
+  const { data, error } = await supabase
+    .from("organizational_structure")
+    .update({
+      image_url_ar: structureForm.image_url_ar,
+      image_url_en: structureForm.image_url_en,
+    })
+    .eq("id", 1)
+    .select();
+
+  if (error) {
+    alert("خطأ: " + error.message);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    alert("ما تم تعديل أي صف. تأكدي من id = 1 أو RLS");
+    return;
+  }
+
+  setStructureForm(data[0]);
+  alert(lang === "ar" ? "تم تحديث الهيكل التنظيمي" : "Structure updated");
+}
 
   if (!session || profile?.role !== "admin") return null;
 
@@ -572,7 +677,40 @@ window.location.reload();
         </div>
       )}
 
-      {selectedSection && currentSection && !currentConfig && !["dean", "about", "users"].includes(selectedSection) && (
+      {selectedSection === "structure" && (
+        <div style={formBoxStyle}>
+          <h3>
+            {lang === "ar"
+              ? "تعديل الهيكل التنظيمي"
+              : "Edit Organizational Structure"}
+          </h3>
+
+          <Input
+  label="رابط صورة الهيكل عربي"
+  value={structureForm.image_url_ar}
+  onChange={(v) =>
+    setStructureForm({ ...structureForm, image_url_ar: v })
+  }
+/>
+
+<Input
+  label="رابط صورة الهيكل إنجليزي"
+  value={structureForm.image_url_en}
+  onChange={(v) =>
+    setStructureForm({ ...structureForm, image_url_en: v })
+  }
+/>
+
+          <button
+            onClick={saveStructure}
+            style={{ ...buttonStyle, background: "#0f766e" }}
+          >
+            {lang === "ar" ? "حفظ" : "Save"}
+          </button>
+        </div>
+      )}
+
+      {selectedSection && currentSection && !currentConfig && !["dean", "about", "users", "structure"].includes(selectedSection) && (
         <div style={emptyStateStyle}>
           {lang === "ar"
             ? "لا يوجد جدول مطابق لهذا القسم حالياً في Supabase، لذلك لم نفعّل فورم له الآن."
