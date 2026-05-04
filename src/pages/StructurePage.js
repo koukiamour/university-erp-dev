@@ -2,52 +2,50 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 export default function StructurePage({ lang = "ar" }) {
-  const [imageUrl, setImageUrl] = useState("/structure.png");
+  const [imageUrl, setImageUrl] = useState(null);
 
   useEffect(() => {
     fetchStructure();
-  }, []);
+  }, [lang]);
 
   async function fetchStructure() {
     const { data, error } = await supabase
       .from("organizational_structure")
       .select("image_url_ar,image_url_en")
       .eq("id", 1)
-      .limit(1);
+      .maybeSingle();
 
     if (error) {
       console.log("Structure fetch error:", error);
+      setImageUrl(null);
       return;
     }
 
-    if (data && data.length > 0) {
-  const row = data[0];
-
-  const selected =
-    lang === "ar"
-      ? row.image_url_ar
-      : row.image_url_en;
-
-  setImageUrl(selected || "/structure.png");
-}
+    // 🔥 هنا نختار فقط حسب اللغة
+    if (lang === "ar") {
+      setImageUrl(data?.image_url_ar || null);
+    } else {
+      setImageUrl(data?.image_url_en || null);
+    }
   }
 
   return (
     <div style={{ textAlign: "center" }}>
-      <img
-        src={imageUrl || "/structure.png"}
-        alt="structure"
-        style={{
-          width: "100%",
-          maxWidth: "1200px",//هنا عدلت جودة الصورة عشان تكون مناسبة للشاشات الكبيرة
-
-          height: "auto",
-          objectFit: "contain",
-          imageRendering: "auto",
-          borderRadius: "16px",
-          boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
-        }}
-      />
+      {/* 👇 لا يعرض أي شيء لين تجي الصورة */}
+      {imageUrl && (
+        <img
+          src={imageUrl}
+          alt="structure"
+          style={{
+            width: "100%",
+            maxWidth: "1200px",
+            height: "auto",
+            objectFit: "contain",
+            borderRadius: "16px",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+          }}
+        />
+      )}
     </div>
   );
 }
