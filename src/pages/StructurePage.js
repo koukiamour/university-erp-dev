@@ -1,41 +1,25 @@
-import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
-
-export default function StructurePage({ lang = "ar" }) {
-  const [imageUrl, setImageUrl] = useState(null);
-
-  useEffect(() => {
-    fetchStructure();
-  }, [lang]);
-
-  async function fetchStructure() {
-    const { data, error } = await supabase
-      .from("organizational_structure")
-      .select("image_url_ar,image_url_en")
-      .eq("id", 1)
-      .maybeSingle();
-
-    if (error) {
-      console.log("Structure fetch error:", error);
-      setImageUrl(null);
-      return;
-    }
-
-    // 🔥 هنا نختار فقط حسب اللغة
-    if (lang === "ar") {
-      setImageUrl(data?.image_url_ar || null);
-    } else {
-      setImageUrl(data?.image_url_en || null);
-    }
-  }
+export default function StructurePage({ lang = "ar", structure }) {
+  const imageUrl =
+    lang === "ar"
+      ? structure?.image_url_ar
+      : structure?.image_url_en;
 
   return (
     <div style={{ textAlign: "center" }}>
-      {/* 👇 لا يعرض أي شيء لين تجي الصورة */}
+      {!imageUrl && (
+        <p style={{ color: "#b45309", fontWeight: "bold" }}>
+          {lang === "ar"
+            ? "جارٍ تحميل الهيكل التنظيمي..."
+            : "Loading organizational structure..."}
+        </p>
+      )}
+
       {imageUrl && (
         <img
           src={imageUrl}
-          alt="structure"
+          alt={lang === "ar" ? "الهيكل التنظيمي" : "Organizational Structure"}
+          loading="lazy"
+          decoding="async"
           style={{
             width: "100%",
             maxWidth: "1200px",

@@ -1,27 +1,4 @@
-import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
-
-export default function DeanMessage({ lang, cardStyle }) {
-  const [dean, setDean] = useState(null);
-
-  useEffect(() => {
-  async function fetchDean() {
-    const { data, error } = await supabase
-      .from("dean_message")
-      .select("*")
-      .eq("id", 1)
-      .limit(1);
-
-    console.log("Dean from Supabase:", data, error); // 👈 الآن صحيح
-
-    if (data && data.length > 0) {
-      setDean(data[0]);
-    }
-  }
-
-  fetchDean();
-}, []);
-
+export default function DeanMessage({ lang, cardStyle, dean }) {
   return (
     <section style={{ ...cardStyle, marginBottom: "24px" }}>
       <h2 style={{ marginTop: 0 }}>
@@ -31,6 +8,8 @@ export default function DeanMessage({ lang, cardStyle }) {
       <img
         src={dean?.image_url || "/dean.jpg"}
         alt="Dean"
+        loading="lazy"
+        decoding="async"
         style={{
           width: "60%",
           maxWidth: "200px",

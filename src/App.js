@@ -30,11 +30,13 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
-
+  
   const [activeForm, setActiveForm] = useState(null);
   const [popupUrl, setPopupUrl] = useState("");
   const [popupTitle, setPopupTitle] = useState("");
-
+  const [deanData, setDeanData] = useState(null);
+  const [aboutData, setAboutData] = useState(null);
+  const [structureData, setStructureData] = useState(null); 
   const [stats, setStats] = useState({
     students: 0,
     programs: 0,
@@ -174,16 +176,19 @@ export default function App() {
   async function fetchAllData() {
     setLoading(true);
     await Promise.all([
-      fetchPrograms(),
-      fetchActivities(),
-      fetchResearch(),
-      fetchCommunity(),
-      fetchAcademic(),
-      fetchStats(),
-      fetchProgramFiles(),
-      fetchStudyPlans(),
-      fetchSchedules(),
-    ]);
+  fetchPrograms(),
+  fetchActivities(),
+  fetchResearch(),
+  fetchCommunity(),
+  fetchAcademic(),
+  fetchStats(),
+  fetchProgramFiles(),
+  fetchStudyPlans(),
+  fetchSchedules(),
+  fetchDeanData(),
+  fetchAboutData(),
+  fetchStructureData(),
+]);
     setLoading(false);
   }
 
@@ -278,7 +283,49 @@ export default function App() {
 
     if (!error) setProgramFiles(data ?? []);
   }
+    async function fetchDeanData() {
+  const { data, error } = await supabase
+    .from("dean_message")
+    .select("name,image_url,message_ar,message_en")
+    .eq("id", 1)
+    .maybeSingle();
 
+  if (error) {
+    console.log("DEAN DATA ERROR:", error);
+    return;
+  }
+
+  setDeanData(data);
+}
+async function fetchAboutData() {
+  const { data, error } = await supabase
+    .from("about_college")
+    .select("*")
+    .eq("id", 1)
+    .maybeSingle();
+
+  if (error) {
+    console.log("ABOUT DATA ERROR:", error);
+    return;
+  }
+
+  setAboutData(data);
+}
+
+async function fetchStructureData() {
+  const { data, error } = await supabase
+    .from("organizational_structure")
+    .select("*")
+    .eq("id", 1)
+    .maybeSingle();
+
+  if (error) {
+    console.log("STRUCTURE DATA ERROR:", error);
+    return;
+  }
+
+  setStructureData(data);
+}
   async function fetchStats() {
     const { data, error } = await supabase
       .from("dashboard_totals")
@@ -1900,23 +1947,105 @@ export default function App() {
             )}
 
             {activeModule === "about" && (
-              <ModalWrapper onClose={() => setActiveModule(null)} maxWidth="900px">
-                <AboutCollege lang={lang} />
-              </ModalWrapper>
-            )}
+  <div
+    onClick={() => setActiveModule(null)}
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.5)",
+      zIndex: 4000,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "20px",
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        background: "white",
+        borderRadius: "20px",
+        padding: "20px",
+        width: "95%",
+        maxWidth: "900px",
+        maxHeight: "85vh",
+        overflowY: "auto",
+      }}
+    >
+      <button onClick={() => setActiveModule(null)}>✖</button>
+      <AboutCollege lang={lang} about={aboutData} />
+    </div>
+  </div>
+)}
 
             {activeModule === "structure" && (
-              <ModalWrapper onClose={() => setActiveModule(null)} maxWidth="900px">
-                <StructurePage lang={lang} />
-              </ModalWrapper>
-            )}
+  <div
+    onClick={() => setActiveModule(null)}
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.5)",
+      zIndex: 4000,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "20px",
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        background: "white",
+        borderRadius: "20px",
+        padding: "20px",
+        width: "95%",
+        maxWidth: "900px",
+        maxHeight: "85vh",
+        overflowY: "auto",
+      }}
+    >
+      <button onClick={() => setActiveModule(null)}>✖</button>
+      <StructurePage lang={lang} structure={structureData} />
+    </div>
+  </div>
+)}
 
             {activeModule === "dean" && (
-              <ModalWrapper onClose={() => setActiveModule(null)} maxWidth="900px">
-                <DeanMessage lang={lang} cardStyle={{ boxShadow: "none", border: "none", padding: 0 }} />
-              </ModalWrapper>
-            )}
+  <div
+    onClick={() => setActiveModule(null)}
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(15, 23, 42, 0.55)",
+      zIndex: 4000,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "20px",
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        background: "white",
+        borderRadius: "22px",
+        padding: "24px",
+        width: "95%",
+        maxWidth: "900px",
+        maxHeight: "85vh",
+        overflowY: "auto",
+      }}
+    >
+      <button onClick={() => setActiveModule(null)}>✖</button>
 
+      <DeanMessage
+  lang={lang}
+  dean={deanData}
+  cardStyle={{ boxShadow: "none", border: "none", padding: 0 }}
+/>
+    </div>
+  </div>
+)}
             {activeModule === "faculty" && (
               <ModalWrapper onClose={() => setActiveModule(null)} maxWidth="900px">
                 <FacultyPage lang={lang} />
