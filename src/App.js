@@ -84,21 +84,7 @@ export default function App() {
 
   const [studentCourses, setStudentCourses] = useState([]);
   const [instructorCourses, setInstructorCourses] = useState([]);
-  const [instantModal, setInstantModal] = useState(null);
-const [instantModalReady, setInstantModalReady] = useState(false);
 
-function openInstantModal(type) {
-  setInstantModal(type);
-  setInstantModalReady(false);
-
-  setTimeout(() => {
-    setInstantModalReady(true);
-  }, 80);
-}
-
-function closeInstantModal() {
-  setInstantModal(null);
-}
   const programDetailsFallback = {
     1: {
       description_ar: "برنامج اللغات والترجمة يركز على تنمية مهارات الترجمة والتواصل بين اللغات.",
@@ -950,29 +936,29 @@ function closeInstantModal() {
               {text.home}
             </button>
 
-            <button onClick={() => openInstantModal("about")} style={navButtonStyle}>
+            <button onClick={() => setActiveModule("about")} style={navButtonStyle}>
               {text.about}
             </button>
 
-            <button onClick={() => openInstantModal("dean")} style={navButtonStyle}>
+            <button onClick={() => setActiveModule("dean")} style={navButtonStyle}>
               {lang === "ar" ? "كلمة العميد" : "Dean Message"}
             </button>
 
-            <button onClick={() => openInstantModal("structure")} style={navButtonStyle}>
+            <button onClick={() => setActiveModule("structure")} style={navButtonStyle}>
               {lang === "ar" ? "الهيكل التنظيمي" : "Organizational Structure"}
             </button>
 
-            <button onClick={() => openInstantModal("faculty")} style={navButtonStyle}>
+            <button onClick={() => setActiveModule("faculty")} style={navButtonStyle}>
               {lang === "ar" ? "أعضاء هيئة التدريس" : "Faculty Members"}
             </button>
 
-            <button onClick={() => openInstantModal("contact")} style={navButtonStyle}>
+            <button onClick={() => setActiveModule("contact")} style={navButtonStyle}>
               {text.contact}
             </button>
 
             {session && profile?.role === "admin" && (
               <button
-                onClick={() => openInstantModal("dashboard")}
+                onClick={() => setActiveModule("dashboard")}
                 style={{
                   ...navButtonStyle,
                   background: activeModule === "dashboard" ? "#134e4a" : "#0f766e",
