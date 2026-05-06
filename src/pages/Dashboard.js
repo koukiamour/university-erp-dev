@@ -154,7 +154,7 @@ export default function Dashboard({
   };
 
   const [contentForm, setContentForm] = useState(emptyForms.programs);
-
+  
   const dashboardSections = [
     { id: "dean", icon: "👤", title_ar: "كلمة العميد", title_en: "Dean Message", desc_ar: "تعديل اسم العميد والنص والصورة.", desc_en: "Edit dean name, text, and image." },
     { id: "about", icon: "🏫", title_ar: "عن الكلية", title_en: "About College", desc_ar: "تعديل المقدمة والرؤية والرسالة والأهداف.", desc_en: "Edit intro, vision, mission, and goals." },
@@ -166,8 +166,8 @@ export default function Dashboard({
     { id: "academic", icon: "🗂️", title_ar: "الشؤون الأكاديمية", title_en: "Academic Affairs", desc_ar: "إدارة طلبات الشؤون الأكاديمية.", desc_en: "Manage academic affairs requests." },
     { id: "quality", icon: "📊", title_ar: "الجودة والتحليلات", title_en: "Quality & Analytics", desc_ar: "إدارة مؤشرات الجودة.", desc_en: "Manage quality indicators." },
     { id: "faculty", icon: "👩‍🏫", title_ar: "أعضاء هيئة التدريس", title_en: "Faculty Members", desc_ar: "إدارة بيانات أعضاء هيئة التدريس.", desc_en: "Manage faculty members." },
-    { id: "contact", icon: "☎️", title_ar: "تواصل معنا", title_en: "Contact Us", desc_ar: "لا يوجد جدول مطابق حالياً في Supabase.", desc_en: "No matching table currently in Supabase." },
-    { id: "structure", icon: "🏛️", title_ar: "الهيكل التنظيمي", title_en: "Organizational Structure", desc_ar: "لا يوجد جدول مطابق حالياً في Supabase.", desc_en: "No matching table currently in Supabase." },
+    { id: "contact", icon: "☎️", title_ar: "تواصل معنا", title_en: "Contact Us", desc_ar: "تعديل بيانات التواصل.", desc_en: "Edit contact information." },
+{ id: "structure", icon: "🏛️", title_ar: "الهيكل التنظيمي", title_en: "Organizational Structure", desc_ar: "تحديث صورة الهيكل التنظيمي.", desc_en: "Update organizational structure image." },
   ];
 
   const configs = {
@@ -318,8 +318,45 @@ export default function Dashboard({
   ],
 },
 
-  };
+    contact: {
+  table: "contact_info",
+  pk: "id",
+  order: "id",
 
+  fields: [
+    ["address_ar", "العنوان عربي"],
+    ["address_en", "Address English"],
+    ["email", "البريد الإلكتروني"],
+    ["phone", "رقم الهاتف"],
+    ["website", "رابط الموقع"],
+  ],
+},
+
+  };
+useEffect(() => {
+  if (!selectedSection) return;
+  if (!configs[selectedSection]) return;
+
+  const saved = localStorage.getItem(`dashboard_draft_${selectedSection}`);
+
+  if (saved) {
+    try {
+      setContentForm(JSON.parse(saved));
+    } catch {
+      localStorage.removeItem(`dashboard_draft_${selectedSection}`);
+    }
+  }
+}, [selectedSection]);
+
+useEffect(() => {
+  if (!selectedSection) return;
+  if (!configs[selectedSection]) return;
+
+  localStorage.setItem(
+    `dashboard_draft_${selectedSection}`,
+    JSON.stringify(contentForm)
+  );
+}, [contentForm, selectedSection]);
   useEffect(() => {
   if (session && profile?.role === "admin") fetchDean();
 }, [session, profile]);
@@ -333,11 +370,23 @@ useEffect(() => {
 
   if (selectedSection === "structure") fetchStructure();
 
-  if (configs[selectedSection]) {
-    setEditingId(null);
+if (configs[selectedSection]) {
+  setEditingId(null);
+
+  const saved = localStorage.getItem(`dashboard_draft_${selectedSection}`);
+
+  if (saved) {
+    try {
+      setContentForm(JSON.parse(saved));
+    } catch {
+      setContentForm(emptyForms[selectedSection]);
+      localStorage.removeItem(`dashboard_draft_${selectedSection}`);
+    }
+  } else {
     setContentForm(emptyForms[selectedSection]);
-    fetchItems(selectedSection);
   }
+
+  fetchItems(selectedSection);  }
 }, [selectedSection, session, profile]);
 
 async function fetchDean() {
@@ -467,9 +516,14 @@ async function fetchDean() {
       return;
     }
 
-    alert(lang === "ar" ? "تم الحفظ بنجاح" : "Saved successfully");
-    resetContentForm();
-    fetchItems(selectedSection);
+    
+alert(lang === "ar" ? "تم الحفظ بنجاح" : "Saved successfully");
+
+localStorage.removeItem(`dashboard_draft_${selectedSection}`);
+
+resetContentForm();
+fetchItems(selectedSection);
+
   }
 
   async function deleteContent(id) {
@@ -632,11 +686,6 @@ async function saveStructure() {
         ))}
       </div>
 
-      {!selectedSection && (
-        <div style={emptyStateStyle}>
-          {lang === "ar" ? "لم يتم اختيار أي قسم بعد." : "No section selected yet."}
-        </div>
-      )}
 
       {selectedSection && (
         <div style={{ marginBottom: "14px" }}>
