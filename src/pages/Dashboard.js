@@ -610,12 +610,7 @@ async function saveStructure() {
         ))}
       </div>
 
-      {!selectedSection && (
-        <div style={emptyStateStyle}>
-          {lang === "ar" ? "لم يتم اختيار أي قسم بعد." : "No section selected yet."}
-        </div>
-      )}
-
+   
       {selectedSection && (
         <div style={{ marginBottom: "14px" }}>
           <button type="button" onClick={() => setSelectedSection(null)} style={{ ...smallButtonStyle, background: "#334155" }}>
