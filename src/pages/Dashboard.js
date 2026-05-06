@@ -158,8 +158,8 @@ export default function Dashboard({
     { id: "academic", icon: "🗂️", title_ar: "الشؤون الأكاديمية", title_en: "Academic Affairs", desc_ar: "إدارة طلبات الشؤون الأكاديمية.", desc_en: "Manage academic affairs requests." },
     { id: "quality", icon: "📊", title_ar: "الجودة والتحليلات", title_en: "Quality & Analytics", desc_ar: "إدارة مؤشرات الجودة.", desc_en: "Manage quality indicators." },
     { id: "faculty", icon: "👩‍🏫", title_ar: "أعضاء هيئة التدريس", title_en: "Faculty Members", desc_ar: "إدارة بيانات أعضاء هيئة التدريس.", desc_en: "Manage faculty members." },
-    { id: "contact", icon: "☎️", title_ar: "تواصل معنا", title_en: "Contact Us", desc_ar: "لا يوجد جدول مطابق حالياً في Supabase.", desc_en: "No matching table currently in Supabase." },
-    { id: "structure", icon: "🏛️", title_ar: "الهيكل التنظيمي", title_en: "Organizational Structure", desc_ar: "لا يوجد جدول مطابق حالياً في Supabase.", desc_en: "No matching table currently in Supabase." },
+    { id: "contact", icon: "☎️", title_ar: "تواصل معنا", title_en: "Contact Us", desc_ar: "تحديث بيانات التواصل ومعلومات الاتصال.", desc_en: "Update contact information." },
+{ id: "structure", icon: "🏛️", title_ar: "الهيكل التنظيمي", title_en: "Organizational Structure", desc_ar: "تحديث صورة الهيكل التنظيمي.", desc_en: "Update organizational structure image." },
   ];
 
   const configs = {
@@ -710,13 +710,7 @@ async function saveStructure() {
         </div>
       )}
 
-      {selectedSection && currentSection && !currentConfig && (
-  <div style={emptyStateStyle}>
-    {lang === "ar"
-      ? "يمكن إدارة هذا القسم من خلال الإعدادات المتقدمة."
-      : "This section can be managed through advanced settings."}
-  </div>
-)}
+      
 
       {currentConfig && currentSection && (
         <div style={formBoxStyle}>
