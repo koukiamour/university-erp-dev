@@ -710,13 +710,13 @@ async function saveStructure() {
         </div>
       )}
 
-      {selectedSection && currentSection && !currentConfig && !["dean", "about", "users", "structure"].includes(selectedSection) && (
-        <div style={emptyStateStyle}>
-          {lang === "ar"
-            ? "لا يوجد جدول مطابق لهذا القسم حالياً في Supabase، لذلك لم نفعّل فورم له الآن."
-            : "There is no matching Supabase table for this section yet, so no form is enabled."}
-        </div>
-      )}
+      {selectedSection && currentSection && !currentConfig && (
+  <div style={emptyStateStyle}>
+    {lang === "ar"
+      ? "يمكن إدارة هذا القسم من خلال الإعدادات المتقدمة."
+      : "This section can be managed through advanced settings."}
+  </div>
+)}
 
       {currentConfig && currentSection && (
         <div style={formBoxStyle}>
