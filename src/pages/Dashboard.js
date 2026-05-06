@@ -143,6 +143,14 @@ export default function Dashboard({
       status_ar: "نشط",
       status_en: "Active",
     },
+    contact: {
+  address_ar: "",
+  address_en: "",
+  email: "",
+  phone: "",
+  website: "",
+},
+
   };
 
   const [contentForm, setContentForm] = useState(emptyForms.programs);
@@ -158,8 +166,8 @@ export default function Dashboard({
     { id: "academic", icon: "🗂️", title_ar: "الشؤون الأكاديمية", title_en: "Academic Affairs", desc_ar: "إدارة طلبات الشؤون الأكاديمية.", desc_en: "Manage academic affairs requests." },
     { id: "quality", icon: "📊", title_ar: "الجودة والتحليلات", title_en: "Quality & Analytics", desc_ar: "إدارة مؤشرات الجودة.", desc_en: "Manage quality indicators." },
     { id: "faculty", icon: "👩‍🏫", title_ar: "أعضاء هيئة التدريس", title_en: "Faculty Members", desc_ar: "إدارة بيانات أعضاء هيئة التدريس.", desc_en: "Manage faculty members." },
-    { id: "contact", icon: "☎️", title_ar: "تواصل معنا", title_en: "Contact Us", desc_ar: "تحديث بيانات التواصل ومعلومات الاتصال.", desc_en: "Update contact information." },
-{ id: "structure", icon: "🏛️", title_ar: "الهيكل التنظيمي", title_en: "Organizational Structure", desc_ar: "تحديث صورة الهيكل التنظيمي.", desc_en: "Update organizational structure image." },
+    { id: "contact", icon: "☎️", title_ar: "تواصل معنا", title_en: "Contact Us", desc_ar: "لا يوجد جدول مطابق حالياً في Supabase.", desc_en: "No matching table currently in Supabase." },
+    { id: "structure", icon: "🏛️", title_ar: "الهيكل التنظيمي", title_en: "Organizational Structure", desc_ar: "لا يوجد جدول مطابق حالياً في Supabase.", desc_en: "No matching table currently in Supabase." },
   ];
 
   const configs = {
@@ -296,6 +304,20 @@ export default function Dashboard({
         ["status_en", "Status English"],
       ],
     },
+    contact: {
+  table: "contact_info",
+  pk: "id",
+  order: "id",
+
+  fields: [
+    ["address_ar", "العنوان عربي"],
+    ["address_en", "Address English"],
+    ["email", "البريد الإلكتروني"],
+    ["phone", "رقم الهاتف"],
+    ["website", "رابط الموقع"],
+  ],
+},
+
   };
 
   useEffect(() => {
@@ -610,7 +632,12 @@ async function saveStructure() {
         ))}
       </div>
 
-   
+      {!selectedSection && (
+        <div style={emptyStateStyle}>
+          {lang === "ar" ? "لم يتم اختيار أي قسم بعد." : "No section selected yet."}
+        </div>
+      )}
+
       {selectedSection && (
         <div style={{ marginBottom: "14px" }}>
           <button type="button" onClick={() => setSelectedSection(null)} style={{ ...smallButtonStyle, background: "#334155" }}>
@@ -705,7 +732,6 @@ async function saveStructure() {
         </div>
       )}
 
-      
 
       {currentConfig && currentSection && (
         <div style={formBoxStyle}>
